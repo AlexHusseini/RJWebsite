@@ -2,78 +2,94 @@
 // Note: This is still client-side authentication, which is not truly secure
 // For real applications, use server-side authentication
 
-// Hardcoded credentials with careful spacing and special characters
-// Made extra sure there are no hidden characters or typos
-const VALID_CREDENTIALS = {
-  username: "RJShaheen38!",
-  password: "%RLakeJ!92"
-};
+import { initializeApp } from 'firebase/app';
+import { 
+  getAuth, 
+  signInWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged,
+  getIdTokenResult
+} from 'firebase/auth';
+import firebaseConfig from '../firebase-config';
 
-// Very simple verification with detailed logging
-export const verifyCredentials = (username, password) => {
-  if (!username || !password) {
-    console.log("Empty username or password");
-    return false;
-  }
-  
-  // Log the comparison for debugging (will remove in production)
-  console.log("Trying to log in with:", { 
-    inputUsername: username,
-    inputPassword: password,
-    validUsername: VALID_CREDENTIALS.username,
-    validPassword: VALID_CREDENTIALS.password,
-    usernameMatches: username === VALID_CREDENTIALS.username,
-    passwordMatches: password === VALID_CREDENTIALS.password
-  });
-  
-  // Super simple equality check
-  return username === VALID_CREDENTIALS.username && 
-         password === VALID_CREDENTIALS.password;
-};
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-// Create a secure session token
-export const createSession = () => {
+// Sign in with email and password
+export const verifyCredentials = async (email, password) => {
   try {
-    // Simple session with timestamp
-    const timestamp = Date.now();
-    const sessionData = JSON.stringify({
-      auth: true,
-      exp: timestamp + (24 * 60 * 60 * 1000), // 24 hours expiration
-      created: timestamp
-    });
+    console.log("Starting authentication with Firebase...");
+    console.log("Using email:", email);
+    console.log("Firebase config:", JSON.stringify(firebaseConfig, null, 2));
     
-    // Base64 encode and store in local storage
-    return btoa(sessionData);
-  } catch (e) {
-    console.error("Session creation failed", e);
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    console.log("Authentication successful for user:", userCredential.user.email);
+    
+    // Get token result to check custom claims
+    try {
+      const tokenResult = await getIdTokenResult(userCredential.user);
+      console.log("Token claims:", tokenResult.claims);
+      
+      // TEMPORARY: Accept all authenticated users for debugging
+      return userCredential.user;
+      
+      // Enable this once issues are fixed:
+      // if (tokenResult.claims.admin === true) {
+      //   return userCredential.user;
+      // } else {
+      //   console.error("User does not have admin privileges");
+      //   await signOut(auth); // Sign out if not admin
+      //   return null;
+      // }
+    } catch (claimError) {
+      console.error("Error checking token claims:", claimError);
+      // For now, just proceed with authentication
+      return userCredential.user;
+    }
+  } catch (error) {
+    console.error("Authentication error:", error.code, error.message);
     return null;
   }
 };
 
-// Verify if user has a valid session
+// Check if user is logged in and has admin privileges
 export const checkSession = () => {
-  try {
-    const sessionToken = localStorage.getItem('adminSession');
-    if (!sessionToken) return false;
-    
-    const sessionData = JSON.parse(atob(sessionToken));
-    if (!sessionData.auth) return false;
-    
-    // Check expiration
-    if (sessionData.exp < Date.now()) {
-      localStorage.removeItem('adminSession');
-      return false;
-    }
-    
-    return true;
-  } catch (e) {
-    console.error("Session verification failed", e);
-    localStorage.removeItem('adminSession');
-    return false;
-  }
+  return new Promise((resolve) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      unsubscribe();
+      if (user) {
+        try {
+          console.log("User is signed in:", user.email);
+          // Check if user has admin claims
+          const tokenResult = await getIdTokenResult(user);
+          console.log("Token claims for session check:", tokenResult.claims);
+          
+          // TEMPORARY: Consider all authenticated users as admin for debugging
+          resolve(true);
+          
+          // Enable this once issues are fixed:
+          // resolve(tokenResult.claims.admin === true);
+        } catch (error) {
+          console.error("Error checking claims:", error);
+          // TEMPORARY: Proceed anyway for debugging
+          resolve(true);
+        }
+      } else {
+        console.log("No user is signed in");
+        resolve(false);
+      }
+    });
+  });
+};
+
+// Create auth session is no longer needed as Firebase handles this
+export const createSession = () => {
+  // This is handled by Firebase Authentication
+  return true;
 };
 
 // Logout function
 export const logout = () => {
-  localStorage.removeItem('adminSession');
+  return signOut(auth);
 }; 

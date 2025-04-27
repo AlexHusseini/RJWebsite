@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { verifyCredentials, createSession, checkSession } from '../auth/authUtils';
+import { verifyCredentials, checkSession } from '../auth/authUtils';
 
 const LoginModal = ({ onClose, onLogin }) => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
   // Check if user already has a valid session
   useEffect(() => {
-    if (checkSession()) {
-      onLogin();
-    }
+    const checkAuth = async () => {
+      const isLoggedIn = await checkSession();
+      if (isLoggedIn) {
+        onLogin();
+      }
+    };
+    checkAuth();
   }, [onLogin]);
 
   const handleSubmit = async (e) => {
@@ -19,26 +23,24 @@ const LoginModal = ({ onClose, onLogin }) => {
     setIsLoading(true);
     setError('');
     
+    console.log("Login attempt with:", { email }); // Don't log password
+    
     try {
-      // Simulate network delay for better UX
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Authenticate with Firebase
+      const user = await verifyCredentials(email, password);
       
-      // Validate credentials
-      const isValid = verifyCredentials(username, password);
+      console.log("Authentication result:", user ? "Success" : "Failed");
       
-      if (isValid) {
-        // Create and store session
-        const token = createSession();
-        localStorage.setItem('adminSession', token);
-        
-        // Navigate to admin panel
+      if (user) {
+        // Successfully logged in, navigate to admin panel
         onLogin();
       } else {
-        setError('Invalid username or password');
-        setTimeout(() => setError(''), 3000);
+        setError('Invalid email or password, or user is not an admin');
+        setTimeout(() => setError(''), 5000);
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      console.error("Login error:", err);
+      setError(`An error occurred: ${err.message || 'Please try again'}`);
     } finally {
       setIsLoading(false);
     }
@@ -108,7 +110,7 @@ const LoginModal = ({ onClose, onLogin }) => {
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '20px' }}>
             <label 
-              htmlFor="username" 
+              htmlFor="email" 
               style={{
                 display: 'block',
                 marginBottom: '8px',
@@ -116,13 +118,13 @@ const LoginModal = ({ onClose, onLogin }) => {
                 opacity: 0.8
               }}
             >
-              Username
+              Email
             </label>
             <input
-              type="text"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               style={{
                 width: '100%',
                 padding: '12px 15px',

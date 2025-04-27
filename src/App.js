@@ -11,19 +11,27 @@ import { checkSession } from './auth/authUtils';
 function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   
   // Check for existing session on load
   useEffect(() => {
-    // If the user has a valid session and tries to access the site again,
-    // we don't automatically redirect them to the admin panel for better UX
-    if (checkSession() && window.location.hash === '#admin') {
-      setActiveTab('admin');
-    }
+    const checkAdminAuth = async () => {
+      const isAuthenticated = await checkSession();
+      setIsAdmin(isAuthenticated);
+      
+      // If the user has a valid session and tries to access the admin panel
+      if (isAuthenticated && window.location.hash === '#admin') {
+        setActiveTab('admin');
+      }
+    };
+    
+    checkAdminAuth();
   }, []);
 
   // Handle logout from admin panel
   const handleLogout = () => {
     setActiveTab('home');
+    setIsAdmin(false);
     // Update URL to remove any potential #admin hash
     if (window.location.hash) {
       window.history.pushState("", document.title, window.location.pathname);
@@ -84,7 +92,7 @@ function App() {
       case 'contact':
         return <Contact />;
       case 'admin':
-        return <AdminPanel onLogout={handleLogout} />;
+        return isAdmin ? <AdminPanel onLogout={handleLogout} /> : <div>Not authorized</div>;
       default:
         return <About />;
     }
@@ -93,9 +101,9 @@ function App() {
   // Handle successful login
   const handleLogin = () => {
     setShowLoginModal(false);
+    setIsAdmin(true);
     setActiveTab('admin');
     // Update URL with a hash to allow for bookmarking/sharing the admin panel
-    // This isn't really secure, just convenient for the user
     window.location.hash = 'admin';
   };
 
