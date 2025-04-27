@@ -763,9 +763,83 @@ input:focus + label, textarea:focus + label, select:focus + label {
     width: 100% !important;
   }
   
+  /* Portfolio gallery fixes */
+  .gallery-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
+    margin-bottom: 40px !important;
+  }
+  
+  .gallery-item {
+    margin-bottom: 15px !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+  
+  .gallery-item > div {
+    padding-bottom: 75% !important;
+    width: 100% !important;
+    height: 0 !important;
+    position: relative !important;
+  }
+  
   /* Ensure images are properly sized */
   img {
     max-width: 100% !important;
     height: auto !important;
+  }
+  
+  /* Fix bottom margin for the last item */
+  section > div:last-child,
+  .gallery-grid > div:last-child {
+    margin-bottom: 20px !important;
+  }
+  
+  /* Fix for bottom padding */
+  .gallery-container {
+    padding-bottom: 30px !important;
+  }
+}
+
+/* Profile image fixes for mobile */
+.profile-image-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-image {
+  object-fit: cover;
+  object-position: center center;
+  transition: transform 0.3s ease-out;
+}
+
+@media screen and (max-width: 480px) {
+  .profile-image-container {
+    width: 180px !important;
+    height: 180px !important;
+    overflow: hidden !important;
+    position: relative !important;
+  }
+  
+  .profile-image {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) scale(1.15) !important;
+    min-width: 100% !important;
+    min-height: 100% !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: cover !important;
+  }
+}
+
+/* Additional iPhone fix */
+@supports (-webkit-touch-callout: none) {
+  .profile-image {
+    transform: translate(-50%, -50%) scale(1.2) !important;
   }
 }

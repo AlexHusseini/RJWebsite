@@ -16,21 +16,25 @@ const Header = () => {
         flexDirection: 'column',
         alignItems: 'center'
       }}>
-        <div style={{
+        <div className="profile-image-container" style={{
           width: '200px',
           height: '200px',
           borderRadius: '50%',
           overflow: 'hidden',
           marginBottom: '30px',
-          boxShadow: '0 5px 15px rgba(0,0,0,0.1)'
+          boxShadow: '0 5px 15px rgba(0,0,0,0.1)',
+          position: 'relative'
         }}>
           <img
             src="/images/car_profile.jpg"
             alt="Classic Porsche"
+            className="profile-image"
             style={{
               width: '100%',
               height: '100%',
-              objectFit: 'cover'
+              objectFit: 'cover',
+              objectPosition: 'center center',
+              transform: 'scale(1.1)'
             }}
           />
         </div>
@@ -82,30 +86,6 @@ const Header = () => {
             }}
           >
             Instagram
-          </a>
-          <a 
-            href="https://twitter.com"
-            style={{
-              color: 'var(--color-text)',
-              textDecoration: 'none',
-              borderBottom: '2px solid var(--color-accent)',
-              padding: '0 3px 3px',
-              fontSize: '16px'
-            }}
-          >
-            Twitter
-          </a>
-          <a 
-            href="https://behance.net"
-            style={{
-              color: 'var(--color-text)',
-              textDecoration: 'none',
-              borderBottom: '2px solid var(--color-accent)',
-              padding: '0 3px 3px',
-              fontSize: '16px'
-            }}
-          >
-            Behance
           </a>
         </div>
       </div>

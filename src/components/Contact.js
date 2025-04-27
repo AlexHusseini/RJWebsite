@@ -180,9 +180,7 @@ const Contact = () => {
             gap: '15px'
           }}>
             {[
-              { name: 'Instagram', url: 'https://www.instagram.com/rs.photography03/' },
-              { name: 'Twitter', url: 'https://twitter.com' },
-              { name: 'Behance', url: 'https://behance.net' }
+              { name: 'Instagram', url: 'https://www.instagram.com/rs.photography03/' }
             ].map(social => (
               <a 
                 key={social.name}

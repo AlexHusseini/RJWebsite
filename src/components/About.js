@@ -230,9 +230,7 @@ const About = () => {
             }
           }}>
             {[
-              { name: 'Instagram', url: 'https://www.instagram.com/rs.photography03/', icon: 'instagram' },
-              { name: 'Twitter', url: 'https://twitter.com', icon: 'twitter' },
-              { name: 'Behance', url: 'https://behance.net', icon: 'behance' }
+              { name: 'Instagram', url: 'https://www.instagram.com/rs.photography03/', icon: 'instagram' }
             ].map(social => (
               <div key={social.name} className="about-social">
                 <a 
