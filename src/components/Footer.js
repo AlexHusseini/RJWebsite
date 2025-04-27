@@ -14,7 +14,7 @@ const Footer = () => {
       fontSize: '0.9rem'
     }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        <p>© {currentYear} APERTURE. All rights reserved.</p>
+        <p>© {currentYear} RS Photography. All rights reserved.</p>
         <p style={{ marginTop: '8px' }}>
           Designed & Developed by{' '}
           <a 
