@@ -251,7 +251,8 @@ const Gallery = () => {
             alignItems: 'center',
             justifyContent: 'center',
             zIndex: 1000,
-            padding: '20px'
+            padding: '20px',
+            overflow: 'auto'
           }}
           onClick={closePhotoDetail}
         >
@@ -259,22 +260,27 @@ const Gallery = () => {
             style={{
               position: 'relative',
               maxWidth: '90%',
-              maxHeight: '90%',
-              animation: 'fadeIn 0.3s ease-out'
+              width: 'auto',
+              animation: 'fadeIn 0.3s ease-out',
+              margin: '40px auto'
             }}
             onClick={(e) => e.stopPropagation()}
           >
             <button
               style={{
-                position: 'absolute',
-                top: '-40px',
-                right: 0,
-                background: 'none',
+                position: 'sticky',
+                top: '0px',
+                right: '0px',
+                background: 'rgba(0,0,0,0.5)',
                 border: 'none',
                 color: 'white',
                 fontSize: '1.5rem',
                 cursor: 'pointer',
-                zIndex: 1001
+                zIndex: 1001,
+                padding: '5px 15px',
+                borderRadius: '50%',
+                float: 'right',
+                marginBottom: '10px'
               }}
               onClick={closePhotoDetail}
             >
@@ -284,10 +290,11 @@ const Gallery = () => {
               src={selectedPhoto.url} 
               alt={selectedPhoto.alt || 'Photography'}
               style={{
-                maxWidth: '100%',
-                maxHeight: '80vh',
+                width: '100%',
+                height: 'auto',
                 boxShadow: '0 5px 25px rgba(0,0,0,0.2)',
-                border: '5px solid white'
+                border: '5px solid white',
+                display: 'block'
               }}
             />
             <div style={{
