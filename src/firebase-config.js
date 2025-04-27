@@ -1,14 +1,14 @@
 // Firebase configuration for client-side
-// This file should ONLY contain non-sensitive configuration that can be exposed to the client
+// Configuration values are loaded from environment variables for security
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD2jiJGAjSQAjxMXTf8Px4rdIR-tn0xeAc",
-  authDomain: "photography-website-ad90f.firebaseapp.com",
-  projectId: "photography-website-ad90f",
-  storageBucket: "photography-website-ad90f.firebasestorage.app",
-  messagingSenderId: "121884957179",
-  appId: "1:121884957179:web:05ad3f527000724919135e",
-  measurementId: "G-977N9PRR2R"
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
 };
 
 export default firebaseConfig; 
