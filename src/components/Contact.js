@@ -31,29 +31,28 @@ const Contact = () => {
     };
     
     try {
-      // In a real app, you'd send the data to a server
-      // await fetch('/api/contact', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify(sanitizedData)
-      // });
-      
-      // For now, just simulate success
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setFormStatus('success');
-      setFormData({
-        name: '',
-        email: '',
-        subject: '',
-        message: ''
+      // Send form data to Formspree
+      const response = await fetch('https://formspree.io/f/xzzrzwkv', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(sanitizedData)
       });
-    } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Form submission error occurred');
+      
+      if (response.ok) {
+        setFormStatus('success');
+        setFormData({
+          name: '',
+          email: '',
+          subject: '',
+          message: ''
+        });
+      } else {
+        throw new Error('Failed to send message');
       }
+    } catch (error) {
+      console.error('Form submission error:', error);
       setFormStatus('error');
     }
     
