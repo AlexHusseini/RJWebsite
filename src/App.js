@@ -9,14 +9,18 @@ import LoginModal from './components/LoginModal';
 import { checkSession } from './auth/authUtils';
 
 function App() {
+  console.log('App component rendering');
   const [activeTab, setActiveTab] = useState('home');
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   
   // Check for existing session on load
   useEffect(() => {
+    console.log('App useEffect running');
     const checkAdminAuth = async () => {
+      console.log('Checking admin auth');
       const isAuthenticated = await checkSession();
+      console.log('Auth status:', isAuthenticated);
       setIsAdmin(isAuthenticated);
       
       // If the user has a valid session and tries to access the admin panel
@@ -30,6 +34,7 @@ function App() {
 
   // Handle logout from admin panel
   const handleLogout = () => {
+    console.log('Logging out');
     setActiveTab('home');
     setIsAdmin(false);
     // Update URL to remove any potential #admin hash
@@ -40,6 +45,7 @@ function App() {
 
   // Render content based on active tab
   const renderContent = () => {
+    console.log('Rendering content for tab:', activeTab);
     switch (activeTab) {
       case 'home':
         return (

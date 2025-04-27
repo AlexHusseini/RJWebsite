@@ -80,7 +80,7 @@ const SectionSelector = ({ sections, activeSection, onSectionChange }) => {
               position: 'relative'
             }}
           >
-            {section.title.toUpperCase()}
+            {section.label.toUpperCase()}
           </button>
         ))}
       </div>

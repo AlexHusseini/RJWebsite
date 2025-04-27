@@ -2,18 +2,15 @@
 // Note: This is still client-side authentication, which is not truly secure
 // For real applications, use server-side authentication
 
-import { initializeApp } from 'firebase/app';
 import { 
   getAuth, 
   signInWithEmailAndPassword, 
-  signOut, 
+  signOut,
   onAuthStateChanged,
   getIdTokenResult
 } from 'firebase/auth';
-import firebaseConfig from '../firebase-config';
+import app from '../firebase/init';
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 // Session timeout duration (30 minutes in milliseconds)
