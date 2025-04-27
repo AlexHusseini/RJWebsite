@@ -111,10 +111,16 @@ const About = () => {
               justifyContent: 'center'
             }
           }}>
-            {['Instagram', 'Twitter', 'Behance'].map(social => (
+            {[
+              { name: 'Instagram', url: 'https://instagram.com' },
+              { name: 'Twitter', url: 'https://twitter.com' },
+              { name: 'Behance', url: 'https://behance.net' }
+            ].map(social => (
               <a 
-                key={social}
-                href="#" 
+                key={social.name}
+                href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{
                   textDecoration: 'none',
                   color: 'var(--color-text)',
@@ -126,7 +132,7 @@ const About = () => {
                   transition: 'color 0.3s ease'
                 }}
               >
-                {social}
+                {social.name}
               </a>
             ))}
           </div>

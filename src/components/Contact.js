@@ -22,6 +22,14 @@ const Contact = () => {
     e.preventDefault();
     setFormStatus('pending');
     
+    // Basic input sanitization
+    const sanitizedData = {
+      name: formData.name.trim().replace(/[<>]/g, ''),
+      email: formData.email.trim().toLowerCase(),
+      subject: formData.subject.trim().replace(/[<>]/g, ''),
+      message: formData.message.trim().replace(/[<>]/g, '')
+    };
+    
     try {
       // In a real app, you'd send the data to a server
       // await fetch('/api/contact', {
@@ -29,7 +37,7 @@ const Contact = () => {
       //   headers: {
       //     'Content-Type': 'application/json',
       //   },
-      //   body: JSON.stringify(formData)
+      //   body: JSON.stringify(sanitizedData)
       // });
       
       // For now, just simulate success
@@ -198,10 +206,16 @@ const Contact = () => {
             display: 'flex',
             gap: '15px'
           }}>
-            {['Instagram', 'Twitter', 'Behance'].map(social => (
+            {[
+              { name: 'Instagram', url: 'https://instagram.com' },
+              { name: 'Twitter', url: 'https://twitter.com' },
+              { name: 'Behance', url: 'https://behance.net' }
+            ].map(social => (
               <a 
-                key={social}
-                href="#" 
+                key={social.name}
+                href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{
                   textDecoration: 'none',
                   color: 'var(--color-text)',
@@ -213,7 +227,7 @@ const Contact = () => {
                   transition: 'color 0.3s ease'
                 }}
               >
-                {social}
+                {social.name}
               </a>
             ))}
           </div>
