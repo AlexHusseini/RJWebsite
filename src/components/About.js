@@ -80,7 +80,7 @@ const About = () => {
             marginBottom: '20px',
             fontFamily: 'var(--font-heading)',
             color: 'var(--color-accent)'
-          }}>Alex Morgan</h3>
+          }}>RJ Shaheen</h3>
           
           <p style={{ 
             marginBottom: '20px', 
@@ -89,7 +89,7 @@ const About = () => {
             color: 'var(--color-text)',
             lineHeight: 1.8
           }}>
-            Hi, I'm Alex. I'm a passionate photographer based in New York, specializing in landscape, portrait, and street photography.
+            Hi, I'm RJ. I'm a passionate photographer based in New York, specializing in landscape, portrait, and street photography.
             My work aims to capture the essence of genuine moments and the beauty in everyday scenes.
           </p>
           
