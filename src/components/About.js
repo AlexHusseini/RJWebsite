@@ -38,8 +38,8 @@ const About = () => {
             zIndex: -1
           }}></div>
           <img 
-            src="/images/photo1.jpg" 
-            alt="Photographer" 
+            src="/images/car_profile.jpg" 
+            alt="Classic Silver Porsche" 
             style={{
               width: '100%',
               height: 'auto',
@@ -85,8 +85,8 @@ const About = () => {
             color: 'var(--color-text)',
             lineHeight: 1.8
           }}>
-            Hi, I'm RJ. I'm a passionate photographer based in New York, specializing in landscape, portrait, and street photography.
-            My work aims to capture the essence of genuine moments and the beauty in everyday scenes.
+            Hi, I'm RJ. I'm a passionate automotive photographer based in New York, specializing in classic cars, sports cars, and custom builds.
+            My work aims to capture the elegance, power, and unique character of exceptional automobiles.
           </p>
           
           <p style={{ 
@@ -95,8 +95,8 @@ const About = () => {
             color: 'var(--color-text)',
             lineHeight: 1.8
           }}>
-            I've been photographing professionally for over 5 years, and my work has been featured in various exhibitions and publications.
-            When I'm not behind the camera, you can find me hiking, traveling, or exploring new coffee shops.
+            I've been photographing cars professionally for over 5 years, and my work has been featured in various automotive exhibitions and publications.
+            When I'm not behind the camera, you can find me at car shows, racetracks, or exploring scenic driving routes.
           </p>
           
           <div style={{
