@@ -14,6 +14,31 @@ function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+  
+  useEffect(() => {
+    // Set the viewport height initially and on resize
+    const setVH = () => {
+      // First we get the viewport height and multiply it by 1% to get a value for a vh unit
+      let vh = window.innerHeight * 0.01;
+      // Then we set the value in the --vh custom property to the root of the document
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+      setViewportHeight(window.innerHeight);
+    };
+    
+    // Set the height initially
+    setVH();
+    
+    // Add event listener
+    window.addEventListener('resize', setVH);
+    window.addEventListener('orientationchange', setVH);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', setVH);
+      window.removeEventListener('orientationchange', setVH);
+    };
+  }, []);
   
   // Check for existing session on load
   useEffect(() => {
@@ -52,15 +77,19 @@ function App() {
         return (
           <>
             <About />
-            <div style={{ textAlign: 'center', margin: '60px 0' }}>
+            <div style={{ 
+              textAlign: 'center', 
+              margin: '60px 0',
+              padding: '0 20px' 
+            }}>
               <h2 style={{
-                fontSize: '1.8rem',
+                fontSize: 'clamp(1.4rem, 4vw, 1.8rem)',
                 fontFamily: 'var(--font-heading)',
                 fontWeight: 400,
                 marginBottom: '20px'
               }}>Featured Work</h2>
               <p style={{
-                fontSize: '1.05rem',
+                fontSize: 'clamp(0.95rem, 3vw, 1.05rem)',
                 maxWidth: '600px',
                 margin: '0 auto 40px',
                 color: 'var(--color-text)',
@@ -77,9 +106,9 @@ function App() {
                   background: 'var(--color-accent)',
                   color: 'white',
                   border: 'none',
-                  padding: '12px 28px',
+                  padding: 'clamp(10px, 3vw, 12px) clamp(20px, 5vw, 28px)',
                   borderRadius: '5px',
-                  fontSize: '0.9rem',
+                  fontSize: 'clamp(0.85rem, 2vw, 0.9rem)',
                   fontWeight: '500',
                   cursor: 'pointer',
                   letterSpacing: '1px',
@@ -119,15 +148,22 @@ function App() {
       backgroundColor: 'var(--color-background)', 
       color: 'var(--color-text)',
       minHeight: '100vh',
+      minHeight: 'calc(var(--vh, 1vh) * 100)',
       position: 'relative',
+      maxWidth: '100%',
+      width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      overflowY: 'auto',
+      WebkitOverflowScrolling: 'touch'
     }}>
       {/* Background accent elements */}
       <div style={{
         position: 'absolute',
         top: '15%',
         right: '5%',
-        width: '150px',
-        height: '150px',
+        width: 'clamp(80px, 15vw, 150px)',
+        height: 'clamp(80px, 15vw, 150px)',
         borderRadius: '50%',
         background: 'var(--color-subtle)',
         opacity: 0.4,
@@ -137,8 +173,8 @@ function App() {
         position: 'absolute',
         bottom: '10%',
         left: '5%',
-        width: '180px',
-        height: '180px',
+        width: 'clamp(100px, 18vw, 180px)',
+        height: 'clamp(100px, 18vw, 180px)',
         borderRadius: '50%',
         background: 'var(--color-subtle)',
         opacity: 0.3,
@@ -146,11 +182,23 @@ function App() {
       }}></div>
       
       {/* Main content */}
-      <div style={{ position: 'relative', zIndex: 1 }}>
+      <div style={{ 
+        position: 'relative', 
+        zIndex: 1, 
+        width: '100%',
+        flex: '1 0 auto',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
         <Header />
         <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
         
-        {renderContent()}
+        <main style={{
+          flex: '1 0 auto',
+          width: '100%'
+        }}>
+          {renderContent()}
+        </main>
         
         {/* Admin Link */}
         {activeTab !== 'admin' && (

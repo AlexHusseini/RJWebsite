@@ -45,9 +45,15 @@ const About = () => {
         gridTemplateColumns: 'minmax(250px, 350px) 1fr',
         gap: '60px',
         alignItems: 'center',
+        width: '100%',
+        height: 'auto',
+        overflow: 'visible',
         '@media (max-width: 768px)': {
           gridTemplateColumns: '1fr',
-          textAlign: 'center'
+          textAlign: 'center',
+          gap: '40px',
+          display: 'flex',
+          flexDirection: 'column'
         }
       }}>
         <div style={{

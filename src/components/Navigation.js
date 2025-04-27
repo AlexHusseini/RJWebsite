@@ -12,15 +12,20 @@ const Navigation = ({ activeTab, setActiveTab }) => {
     <nav style={{
       display: 'flex',
       justifyContent: 'center',
-      marginTop: '20px',
-      marginBottom: '30px'
+      width: '100%',
+      padding: '15px 10px',
+      backgroundColor: '#f9f9f9',
+      boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+      marginBottom: '20px'
     }}>
       <ul style={{
         display: 'flex',
         listStyle: 'none',
-        gap: '40px',
+        margin: 0,
         padding: 0,
-        margin: 0
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        gap: '15px'
       }}>
         {tabs.map(tab => (
           <li key={tab.id}>
@@ -30,13 +35,10 @@ const Navigation = ({ activeTab, setActiveTab }) => {
                 background: 'none',
                 border: 'none',
                 color: activeTab === tab.id ? 'var(--color-accent)' : 'var(--color-text)',
-                fontSize: '0.9rem',
-                letterSpacing: '2px',
-                padding: '8px 0',
-                cursor: 'pointer',
-                position: 'relative',
                 fontWeight: activeTab === tab.id ? '500' : '400',
-                transition: 'color 0.3s ease',
+                fontSize: '14px',
+                padding: '8px 12px',
+                cursor: 'pointer',
                 borderBottom: activeTab === tab.id ? '2px solid var(--color-accent)' : '2px solid transparent'
               }}
             >

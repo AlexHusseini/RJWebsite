@@ -91,8 +91,14 @@ const Contact = () => {
         gridTemplateColumns: '1fr 1fr',
         gap: '50px',
         alignItems: 'start',
+        width: '100%',
+        height: 'auto',
+        overflow: 'visible',
         '@media (max-width: 768px)': {
           gridTemplateColumns: '1fr',
+          gap: '30px',
+          display: 'flex',
+          flexDirection: 'column'
         }
       }}>
         <div>
