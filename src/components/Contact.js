@@ -18,19 +18,36 @@ const Contact = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // In a real app, you'd send the data to a server
-    console.log('Form submitted:', formData);
+    setFormStatus('pending');
     
-    // Simulate submission success
-    setFormStatus('success');
-    setFormData({
-      name: '',
-      email: '',
-      subject: '',
-      message: ''
-    });
+    try {
+      // In a real app, you'd send the data to a server
+      // await fetch('/api/contact', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify(formData)
+      // });
+      
+      // For now, just simulate success
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setFormStatus('success');
+      setFormData({
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
+      });
+    } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Form submission error occurred');
+      }
+      setFormStatus('error');
+    }
     
     // Reset status after 5 seconds
     setTimeout(() => {

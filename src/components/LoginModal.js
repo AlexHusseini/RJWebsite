@@ -23,13 +23,9 @@ const LoginModal = ({ onClose, onLogin }) => {
     setIsLoading(true);
     setError('');
     
-    console.log("Login attempt with:", { email }); // Don't log password
-    
     try {
       // Authenticate with Firebase
       const user = await verifyCredentials(email, password);
-      
-      console.log("Authentication result:", user ? "Success" : "Failed");
       
       if (user) {
         // Successfully logged in, navigate to admin panel
@@ -39,8 +35,10 @@ const LoginModal = ({ onClose, onLogin }) => {
         setTimeout(() => setError(''), 5000);
       }
     } catch (err) {
-      console.error("Login error:", err);
-      setError(`An error occurred: ${err.message || 'Please try again'}`);
+      if (process.env.NODE_ENV === 'development') {
+        console.log("Login error occurred");
+      }
+      setError(`An error occurred. Please try again`);
     } finally {
       setIsLoading(false);
     }
