@@ -20,7 +20,7 @@ const Header = () => {
         zIndex: '2'
       }}>
         <a 
-          href="https://instagram.com" 
+          href="https://www.instagram.com/rs.photography03/" 
           target="_blank" 
           rel="noopener noreferrer"
           aria-label="Instagram" 

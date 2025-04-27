@@ -108,7 +108,7 @@ const About = () => {
             }
           }}>
             {[
-              { name: 'Instagram', url: 'https://instagram.com', icon: 'instagram' },
+              { name: 'Instagram', url: 'https://www.instagram.com/rs.photography03/', icon: 'instagram' },
               { name: 'Twitter', url: 'https://twitter.com', icon: 'twitter' },
               { name: 'Behance', url: 'https://behance.net', icon: 'behance' }
             ].map(social => (

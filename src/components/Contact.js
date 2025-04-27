@@ -174,7 +174,7 @@ const Contact = () => {
             gap: '15px'
           }}>
             {[
-              { name: 'Instagram', url: 'https://instagram.com' },
+              { name: 'Instagram', url: 'https://www.instagram.com/rs.photography03/' },
               { name: 'Twitter', url: 'https://twitter.com' },
               { name: 'Behance', url: 'https://behance.net' }
             ].map(social => (
