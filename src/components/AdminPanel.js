@@ -287,6 +287,34 @@ const AdminPanel = ({ onLogout }) => {
     }
   };
 
+  const handleMovePhoto = async (photoId, newSectionId) => {
+    if (!newSectionId) return;
+    
+    setIsLoading(true);
+    try {
+      // Update the photo section in the database
+      await updatePhotoSection(photoId, newSectionId);
+      
+      // Update local state
+      setPhotos(prevPhotos => 
+        prevPhotos.map(photo => 
+          photo.id === photoId ? { ...photo, section: newSectionId } : photo
+        )
+      );
+      
+      setShowSuccess(`Photo moved to ${sections.find(s => s.id === newSectionId)?.label} successfully!`);
+    } catch (error) {
+      console.error('Error moving photo:', error);
+      setError(`Failed to move photo: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+      setTimeout(() => {
+        setShowSuccess('');
+        setError(null);
+      }, 3000);
+    }
+  };
+
   if (isLoading) {
     return (
       <div style={{
@@ -765,7 +793,44 @@ const AdminPanel = ({ onLogout }) => {
                   fontSize: '0.9rem'
                 }}>
                   <div style={{ fontWeight: '500', marginBottom: '5px' }}>{photo.title}</div>
-                  <div style={{ opacity: 0.8 }}>{sections.find(s => s.id === photo.section)?.label}</div>
+                  <div style={{ 
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}>
+                    <div style={{ opacity: 0.8 }}>
+                      {sections.find(s => s.id === photo.section)?.label}
+                    </div>
+                    <div style={{
+                      position: 'relative',
+                      marginLeft: '8px',
+                      width: '100px'
+                    }}>
+                      <select
+                        onChange={(e) => handleMovePhoto(photo.id, e.target.value)}
+                        value=""
+                        style={{
+                          padding: '3px 8px',
+                          fontSize: '0.8rem',
+                          borderRadius: '3px',
+                          border: '1px solid rgba(166, 124, 82, 0.5)',
+                          backgroundColor: 'rgba(0,0,0,0.7)',
+                          color: 'white',
+                          cursor: 'pointer',
+                          width: '100%'
+                        }}
+                      >
+                        <option value="" disabled>Move to...</option>
+                        {sections
+                          .filter(s => s.id !== photo.section)
+                          .map(section => (
+                            <option key={section.id} value={section.id}>
+                              {section.label}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+                  </div>
                 </div>
                 <button
                   onClick={() => handleDeletePhoto(photo.id, photo.url)}

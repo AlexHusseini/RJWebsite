@@ -10,6 +10,7 @@
   --color-background: #faf9f6;
   --color-text: #262626;
   --color-accent: #a67c52;
+  --color-accent-rgb: 166, 124, 82;
   --color-subtle: #e6e2dd;
   --font-heading: 'Playfair Display', serif;
   --font-body: 'Montserrat', sans-serif;
@@ -72,3 +73,139 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+/* Custom Dropdown Styles */
+.select-container {
+  position: relative;
+  display: inline-block;
+}
+
+.select-container select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  padding-right: 25px;
+  transition: all 0.3s ease;
+}
+
+.select-container select:hover {
+  border-color: var(--color-accent);
+}
+
+.select-container select:focus {
+  box-shadow: 0 0 0 2px rgba(166, 124, 82, 0.5);
+  outline: none;
+}
+
+/* Override browser-specific select styles */
+select::-ms-expand {
+  display: none;
+}
+
+/* Custom dropdown arrow */
+.select-container::after {
+  content: '';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid white;
+  pointer-events: none;
+}
+
+/* Firefox specific styles */
+@-moz-document url-prefix() {
+  .select-container select {
+    text-indent: 0.01px;
+    text-overflow: '';
+    padding-right: 25px;
+  }
+}
+
+/* Dropdown option hover effect - Note: this only works in some browsers */
+select option:hover,
+select option:focus,
+select option:active {
+  background-color: var(--color-accent) !important;
+  color: white !important;
+}
+
+select option {
+  font-family: var(--font-body);
+}
+
+/* Custom Dropdown Animations */
+.custom-dropdown .dropdown-options {
+  transform-origin: top center;
+  transform: scaleY(0);
+  transition: 
+    opacity 0.3s ease,
+    transform 0.3s ease,
+    max-height 0.3s ease,
+    visibility 0s linear 0.3s;
+  z-index: 9999;
+  pointer-events: none;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  will-change: transform, opacity;
+}
+
+.custom-dropdown .dropdown-options.open {
+  transform: scaleY(1);
+  visibility: visible !important;
+  opacity: 1 !important;
+  transition-delay: 0s;
+  pointer-events: all;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+  max-height: 200px !important;
+}
+
+.dropdown-option {
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: all 0.3s ease;
+  color: white !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.dropdown-options.open .dropdown-option {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dropdown-option:hover {
+  background-color: rgba(var(--color-accent-rgb), 0.5) !important;
+}
+
+/* Make sure dropdown appears above other elements */
+.custom-dropdown {
+  position: relative;
+  z-index: 1000;
+}
+
+.dropdown-header {
+  color: white !important;
+  background: rgba(0,0,0,0.7) !important;
+}
+
+/* Fix for Firefox */
+@-moz-document url-prefix() {
+  .dropdown-options {
+    transform: scaleY(0.01) !important;
+  }
+  
+  .dropdown-options.open {
+    transform: scaleY(1) !important;
+  }
+}
+
+/* Stagger the dropdown option animations */
+.dropdown-options.open .dropdown-option:nth-child(1) { transition-delay: 0.03s; }
+.dropdown-options.open .dropdown-option:nth-child(2) { transition-delay: 0.06s; }
+.dropdown-options.open .dropdown-option:nth-child(3) { transition-delay: 0.09s; }
+.dropdown-options.open .dropdown-option:nth-child(4) { transition-delay: 0.12s; }
+.dropdown-options.open .dropdown-option:nth-child(5) { transition-delay: 0.15s; }
