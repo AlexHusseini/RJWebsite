@@ -9,38 +9,16 @@ const About = () => {
       lineHeight: '1.8',
       position: 'relative'
     }}>
-      <div style={{
-        textAlign: 'center',
-        marginBottom: '50px'
-      }}>
-        <h2 style={{
-          fontSize: '2.2rem',
-          fontWeight: '400',
-          marginBottom: '15px',
-          letterSpacing: '1px',
-          color: 'var(--color-text)'
-        }}>About the Photographer</h2>
-        
-        <div style={{
-          width: '40px',
-          height: '2px',
-          background: 'var(--color-accent)',
-          margin: '0 auto 30px',
-          opacity: 0.7
-        }}></div>
+      <div className="section-header">
+        <h2 className="section-title">About the Photographer</h2>
+        <div className="section-divider"></div>
       </div>
       
-      <div style={{
+      <div className="card" style={{
         display: 'grid',
         gridTemplateColumns: 'minmax(200px, 300px) 1fr',
         gap: '50px',
         alignItems: 'center',
-        background: 'white',
-        borderRadius: '8px',
-        boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
-        padding: '30px',
-        position: 'relative',
-        zIndex: 1,
         '@media (max-width: 768px)': {
           gridTemplateColumns: '1fr',
           textAlign: 'center'
@@ -69,18 +47,36 @@ const About = () => {
               objectFit: 'cover',
               borderRadius: '50%',
               border: '5px solid white',
-              boxShadow: '0 5px 15px rgba(0,0,0,0.1)'
+              boxShadow: '0 5px 15px var(--color-shadow)',
+              transition: 'transform 0.5s ease, box-shadow 0.5s ease',
+              '&:hover': {
+                transform: 'scale(1.02)',
+                boxShadow: '0 10px 25px var(--color-shadow)'
+              }
             }}
           />
         </div>
         
         <div style={{ position: 'relative' }}>
           <h3 style={{
-            fontSize: '1.6rem',
+            fontSize: '1.8rem',
             marginBottom: '20px',
             fontFamily: 'var(--font-heading)',
-            color: 'var(--color-accent)'
-          }}>RJ Shaheen</h3>
+            color: 'var(--color-accent)',
+            position: 'relative',
+            display: 'inline-block'
+          }}>
+            RJ Shaheen
+            <span style={{
+              position: 'absolute',
+              bottom: '-5px',
+              left: '0',
+              width: '40%',
+              height: '2px',
+              background: 'var(--color-accent)',
+              opacity: '0.5'
+            }}></span>
+          </h3>
           
           <p style={{ 
             marginBottom: '20px', 
@@ -106,34 +102,38 @@ const About = () => {
           <div style={{
             marginTop: '25px',
             display: 'flex',
-            gap: '15px',
+            gap: '20px',
             '@media (max-width: 768px)': {
               justifyContent: 'center'
             }
           }}>
             {[
-              { name: 'Instagram', url: 'https://instagram.com' },
-              { name: 'Twitter', url: 'https://twitter.com' },
-              { name: 'Behance', url: 'https://behance.net' }
+              { name: 'Instagram', url: 'https://instagram.com', icon: 'instagram' },
+              { name: 'Twitter', url: 'https://twitter.com', icon: 'twitter' },
+              { name: 'Behance', url: 'https://behance.net', icon: 'behance' }
             ].map(social => (
-              <a 
-                key={social.name}
-                href={social.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  textDecoration: 'none',
-                  color: 'var(--color-text)',
-                  fontSize: '0.9rem',
-                  fontWeight: 500,
-                  letterSpacing: '1px',
-                  borderBottom: '1px solid var(--color-accent)',
-                  paddingBottom: '3px',
-                  transition: 'color 0.3s ease'
-                }}
-              >
-                {social.name}
-              </a>
+              <div key={social.name} className="about-social">
+                <a 
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    textDecoration: 'none',
+                    color: 'var(--color-text)',
+                    fontSize: '0.9rem',
+                    fontWeight: 500,
+                    letterSpacing: '1px',
+                    borderBottom: '1px solid var(--color-accent)',
+                    paddingBottom: '3px',
+                    transition: 'all 0.3s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  {social.name}
+                </a>
+              </div>
             ))}
           </div>
         </div>

@@ -69,26 +69,9 @@ const Contact = () => {
       margin: '0 auto 80px',
       padding: '0 20px',
     }}>
-      <div style={{
-        textAlign: 'center',
-        marginBottom: '50px'
-      }}>
-        <h2 style={{
-          fontSize: '2.2rem',
-          fontWeight: '400',
-          marginBottom: '15px',
-          letterSpacing: '1px',
-          color: 'var(--color-text)'
-        }}>Get In Touch</h2>
-        
-        <div style={{
-          width: '40px',
-          height: '2px',
-          background: 'var(--color-accent)',
-          margin: '0 auto 30px',
-          opacity: 0.7
-        }}></div>
-        
+      <div className="section-header">
+        <h2 className="section-title">Get In Touch</h2>
+        <div className="section-divider"></div>
         <p style={{
           maxWidth: '600px',
           margin: '0 auto',
@@ -103,15 +86,11 @@ const Contact = () => {
         </p>
       </div>
       
-      <div style={{
+      <div className="card" style={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
         gap: '50px',
         alignItems: 'start',
-        background: 'white',
-        borderRadius: '8px',
-        boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
-        padding: '40px',
         '@media (max-width: 768px)': {
           gridTemplateColumns: '1fr',
         }
@@ -121,35 +100,36 @@ const Contact = () => {
             fontSize: '1.5rem',
             marginBottom: '20px',
             fontFamily: 'var(--font-heading)',
-            color: 'var(--color-accent)'
-          }}>Contact Information</h3>
+            color: 'var(--color-accent)',
+            position: 'relative',
+            display: 'inline-block'
+          }}>
+            Contact Information
+            <span style={{
+              position: 'absolute',
+              bottom: '-5px',
+              left: '0',
+              width: '40%',
+              height: '2px',
+              background: 'var(--color-accent)',
+              opacity: '0.5'
+            }}></span>
+          </h3>
           
           <p style={{
             marginBottom: '30px',
             fontSize: '1rem',
             lineHeight: 1.8,
-            opacity: 0.8
+            opacity: 0.8,
+            color: 'var(--color-text)'
           }}>
             I'm based in New York City but work with clients worldwide.
             Expect a response within 24-48 hours.
           </p>
           
           <div style={{ marginBottom: '30px' }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              marginBottom: '15px'
-            }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '50%',
-                backgroundColor: 'var(--color-subtle)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginRight: '15px'
-              }}>
+            <div className="contact-info-item">
+              <div className="contact-icon-wrapper">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M22 6C22 4.9 21.1 4 20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6ZM20 6L12 11L4 6H20ZM20 18H4V8L12 13L20 8V18Z" fill="var(--color-accent)"/>
                 </svg>
@@ -157,21 +137,8 @@ const Contact = () => {
               <span>contact@aperture.com</span>
             </div>
             
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              marginBottom: '15px'
-            }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '50%',
-                backgroundColor: 'var(--color-subtle)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginRight: '15px'
-              }}>
+            <div className="contact-info-item">
+              <div className="contact-icon-wrapper">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M6.62 10.79C8.06 13.62 10.38 15.94 13.21 17.38L15.41 15.18C15.69 14.9 16.08 14.82 16.43 14.93C17.55 15.3 18.75 15.5 20 15.5C20.55 15.5 21 15.95 21 16.5V20C21 20.55 20.55 21 20 21C10.61 21 3 13.39 3 4C3 3.45 3.45 3 4 3H7.5C8.05 3 8.5 3.45 8.5 4C8.5 5.25 8.7 6.45 9.07 7.57C9.18 7.92 9.1 8.31 8.82 8.59L6.62 10.79Z" fill="var(--color-accent)"/>
                 </svg>
@@ -179,25 +146,25 @@ const Contact = () => {
               <span>+1 (212) 555-1234</span>
             </div>
             
-            <div style={{
-              display: 'flex',
-              alignItems: 'center'
-            }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '50%',
-                backgroundColor: 'var(--color-subtle)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginRight: '15px'
-              }}>
+            <div className="contact-info-item">
+              <div className="contact-icon-wrapper">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z" fill="var(--color-accent)"/>
                 </svg>
               </div>
-              <span>New York, NY</span>
+              <a 
+                href="https://maps.google.com/?q=New+York+NY"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="View location on Google Maps"
+                style={{
+                  textDecoration: 'none',
+                  color: 'var(--color-text)',
+                  transition: 'color 0.3s ease'
+                }}
+              >
+                New York, NY
+              </a>
             </div>
           </div>
           
@@ -224,8 +191,10 @@ const Contact = () => {
                   letterSpacing: '1px',
                   borderBottom: '1px solid var(--color-accent)',
                   paddingBottom: '3px',
-                  transition: 'color 0.3s ease'
+                  transition: 'all 0.3s ease'
                 }}
+                onMouseOver={(e) => e.target.style.color = 'var(--color-accent)'}
+                onMouseOut={(e) => e.target.style.color = 'var(--color-text)'}
               >
                 {social.name}
               </a>
@@ -235,37 +204,33 @@ const Contact = () => {
         
         <div>
           {formStatus === 'success' ? (
-            <div style={{
-              backgroundColor: 'rgba(75, 181, 67, 0.1)',
-              padding: '20px',
-              borderRadius: '5px',
-              textAlign: 'center',
-              marginBottom: '20px'
-            }}>
+            <div className="success-message">
               <p style={{
                 color: '#4BB543',
                 fontWeight: '500',
                 marginBottom: '5px'
               }}>Message Sent!</p>
               <p style={{
-                fontSize: '0.9rem',
-                opacity: 0.8
-              }}>Thank you for contacting me. I'll get back to you soon.</p>
+                opacity: 0.8,
+                color: 'var(--color-text)'
+              }}>Thank you for reaching out. I'll get back to you soon.</p>
+            </div>
+          ) : formStatus === 'error' ? (
+            <div className="error-message">
+              <p style={{
+                color: '#d32f2f',
+                fontWeight: '500',
+                marginBottom: '5px'
+              }}>Something went wrong!</p>
+              <p style={{
+                opacity: 0.8,
+                color: 'var(--color-text)'
+              }}>Please try again or contact me directly via email.</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit}>
               <div style={{ marginBottom: '20px' }}>
-                <label
-                  htmlFor="name"
-                  style={{
-                    display: 'block',
-                    marginBottom: '8px',
-                    fontSize: '0.9rem',
-                    opacity: 0.8
-                  }}
-                >
-                  Your Name
-                </label>
+                <label htmlFor="name">Your Name</label>
                 <input
                   type="text"
                   id="name"
@@ -273,33 +238,11 @@ const Contact = () => {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  style={{
-                    width: '100%',
-                    padding: '12px 15px',
-                    borderRadius: '5px',
-                    border: '1px solid var(--color-subtle)',
-                    fontSize: '1rem',
-                    transition: 'border-color 0.3s ease',
-                    outline: 'none',
-                    '&:focus': {
-                      borderColor: 'var(--color-accent)'
-                    }
-                  }}
                 />
               </div>
               
               <div style={{ marginBottom: '20px' }}>
-                <label
-                  htmlFor="email"
-                  style={{
-                    display: 'block',
-                    marginBottom: '8px',
-                    fontSize: '0.9rem',
-                    opacity: 0.8
-                  }}
-                >
-                  Email Address
-                </label>
+                <label htmlFor="email">Email Address</label>
                 <input
                   type="email"
                   id="email"
@@ -307,33 +250,11 @@ const Contact = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  style={{
-                    width: '100%',
-                    padding: '12px 15px',
-                    borderRadius: '5px',
-                    border: '1px solid var(--color-subtle)',
-                    fontSize: '1rem',
-                    transition: 'border-color 0.3s ease',
-                    outline: 'none',
-                    '&:focus': {
-                      borderColor: 'var(--color-accent)'
-                    }
-                  }}
                 />
               </div>
               
               <div style={{ marginBottom: '20px' }}>
-                <label
-                  htmlFor="subject"
-                  style={{
-                    display: 'block',
-                    marginBottom: '8px',
-                    fontSize: '0.9rem',
-                    opacity: 0.8
-                  }}
-                >
-                  Subject
-                </label>
+                <label htmlFor="subject">Subject</label>
                 <input
                   type="text"
                   id="subject"
@@ -341,33 +262,11 @@ const Contact = () => {
                   value={formData.subject}
                   onChange={handleChange}
                   required
-                  style={{
-                    width: '100%',
-                    padding: '12px 15px',
-                    borderRadius: '5px',
-                    border: '1px solid var(--color-subtle)',
-                    fontSize: '1rem',
-                    transition: 'border-color 0.3s ease',
-                    outline: 'none',
-                    '&:focus': {
-                      borderColor: 'var(--color-accent)'
-                    }
-                  }}
                 />
               </div>
               
               <div style={{ marginBottom: '25px' }}>
-                <label
-                  htmlFor="message"
-                  style={{
-                    display: 'block',
-                    marginBottom: '8px',
-                    fontSize: '0.9rem',
-                    opacity: 0.8
-                  }}
-                >
-                  Message
-                </label>
+                <label htmlFor="message">Message</label>
                 <textarea
                   id="message"
                   name="message"
@@ -375,42 +274,16 @@ const Contact = () => {
                   onChange={handleChange}
                   required
                   rows={5}
-                  style={{
-                    width: '100%',
-                    padding: '12px 15px',
-                    borderRadius: '5px',
-                    border: '1px solid var(--color-subtle)',
-                    fontSize: '1rem',
-                    resize: 'vertical',
-                    transition: 'border-color 0.3s ease',
-                    outline: 'none',
-                    fontFamily: 'inherit',
-                    '&:focus': {
-                      borderColor: 'var(--color-accent)'
-                    }
-                  }}
+                  style={{ resize: 'vertical', fontFamily: 'inherit' }}
                 />
               </div>
               
               <button
                 type="submit"
-                style={{
-                  background: 'var(--color-accent)',
-                  color: 'white',
-                  border: 'none',
-                  padding: '12px 25px',
-                  borderRadius: '5px',
-                  fontSize: '0.95rem',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.3s ease',
-                  letterSpacing: '1px',
-                  '&:hover': {
-                    backgroundColor: 'darken(var(--color-accent), 10%)'
-                  }
-                }}
+                className="btn"
+                disabled={formStatus === 'pending'}
               >
-                SEND MESSAGE
+                {formStatus === 'pending' ? 'SENDING...' : 'SEND MESSAGE'}
               </button>
             </form>
           )}
