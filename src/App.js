@@ -75,7 +75,7 @@ function App() {
     switch (activeTab) {
       case 'home':
         return (
-          <>
+          <div id="home">
             <About />
             <div style={{ 
               textAlign: 'center', 
@@ -119,7 +119,7 @@ function App() {
                 VIEW FULL PORTFOLIO
               </button>
             </div>
-          </>
+          </div>
         );
       case 'portfolio':
         return <Gallery />;

@@ -64,7 +64,7 @@ const Contact = () => {
   };
 
   return (
-    <section className="fade-in" style={{
+    <section id="contact" className="fade-in" style={{
       maxWidth: '900px',
       margin: '0 auto 80px',
       padding: '0 20px',

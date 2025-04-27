@@ -2,18 +2,13 @@ import React from 'react';
 
 const About = () => {
   return (
-    <section className="fade-in" style={{
+    <section id="about" className="fade-in" style={{
       maxWidth: '1000px',
       margin: '0 auto 100px',
       padding: '0 30px',
       lineHeight: '1.8',
       position: 'relative'
     }}>
-      <div className="section-header">
-        <h2 className="section-title">About the Photographer</h2>
-        <div className="section-divider"></div>
-      </div>
-      
       {/* Background accent elements */}
       <div className="float-animation" style={{
         position: 'absolute',
@@ -134,7 +129,7 @@ const About = () => {
             display: 'inline-block',
             fontWeight: '500'
           }}>
-            RJ Shaheen
+            About Me
             <span style={{
               position: 'absolute',
               bottom: '-8px',
@@ -147,16 +142,30 @@ const About = () => {
           </h3>
           
           <p style={{ 
-            marginBottom: '25px', 
             fontSize: '1.15rem',
             fontWeight: 300,
             color: 'var(--color-text)',
             lineHeight: 1.9,
+            marginBottom: '25px',
             position: 'relative',
             zIndex: 1
           }}>
-            Hi, I'm RJ. I'm a passionate automotive photographer based in New York, specializing in classic cars, sports cars, and custom builds.
-            My work aims to capture the elegance, power, and unique character of exceptional automobiles.
+            Hi, I'm RJ Shaheen, a passionate automotive photographer based in New York with over 5 years of professional experience. 
+            I specialize in capturing the elegance and power of classic cars, sports cars, and custom builds.
+          </p>
+          
+          <p style={{ 
+            fontSize: '1.15rem',
+            fontWeight: 300,
+            color: 'var(--color-text)',
+            lineHeight: 1.9,
+            marginBottom: '25px',
+            position: 'relative',
+            zIndex: 1
+          }}>
+            My approach combines technical precision with artistic composition to highlight the unique personality of each vehicle. 
+            Whether it's the timeless curves of vintage classics or the aggressive lines of modern supercars, 
+            I strive to create images that evoke emotion and showcase automotive design at its finest.
           </p>
           
           <p style={{ 
@@ -168,8 +177,8 @@ const About = () => {
             position: 'relative',
             zIndex: 1
           }}>
-            I've been photographing cars professionally for over 5 years, and my work has been featured in various automotive exhibitions and publications.
-            When I'm not behind the camera, you can find me at car shows, racetracks, or exploring scenic driving routes.
+            My work has been featured in various automotive exhibitions and publications including Road & Track, Classic Driver, and Petrolicious. 
+            When I'm not behind the camera, you can find me at car shows, racetracks, or exploring scenic driving routes with my own collection of classic cars.
           </p>
           
           <div style={{

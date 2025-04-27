@@ -80,11 +80,10 @@ const Gallery = () => {
   };
 
   return (
-    <div className="gallery-container" style={{
+    <section id="portfolio" className="fade-in gallery-container" style={{
       maxWidth: '1200px',
-      margin: '0 auto',
+      margin: '0 auto 100px',
       padding: '0 20px',
-      position: 'relative'
     }}>
       <SectionSelector 
         sections={sections} 
@@ -319,7 +318,7 @@ const Gallery = () => {
           </div>
         </div>
       )}
-    </div>
+    </section>
   );
 };
 

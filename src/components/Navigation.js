@@ -7,6 +7,21 @@ const Navigation = ({ activeTab, setActiveTab }) => {
     { id: 'about', label: 'ABOUT' },
     { id: 'contact', label: 'CONTACT' }
   ];
+  
+  const handleTabClick = (tabId) => {
+    setActiveTab(tabId);
+    
+    // Add a small delay to ensure the component is rendered before scrolling
+    setTimeout(() => {
+      const element = document.getElementById(tabId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        // If there's no specific element with that ID, scroll to top for home
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 100);
+  };
 
   return (
     <nav style={{
@@ -30,7 +45,7 @@ const Navigation = ({ activeTab, setActiveTab }) => {
         {tabs.map(tab => (
           <li key={tab.id}>
             <button
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => handleTabClick(tab.id)}
               style={{
                 background: 'none',
                 border: 'none',
