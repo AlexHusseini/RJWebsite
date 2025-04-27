@@ -3,20 +3,46 @@ import React from 'react';
 const Header = () => {
   return (
     <header style={{
-      padding: '50px 0 30px',
+      padding: '60px 0 40px',
       textAlign: 'center',
-      borderBottom: '1px solid var(--color-subtle)',
-      marginBottom: '60px',
+      borderBottom: '1px solid rgba(78, 124, 138, 0.2)',
+      marginBottom: '70px',
       position: 'relative',
-      background: 'linear-gradient(180deg, rgba(245,245,245,0.3) 0%, rgba(255,255,255,1) 100%)'
+      background: 'linear-gradient(180deg, rgba(245,245,245,0.5) 0%, rgba(255,255,255,1) 100%)',
+      overflow: 'hidden'
     }}>
+      {/* Background pattern elements */}
+      <div className="float-animation" style={{
+        position: 'absolute',
+        top: '10%',
+        left: '5%',
+        width: '180px',
+        height: '180px',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(78, 124, 138, 0.1) 0%, rgba(78, 124, 138, 0.05) 70%, transparent 100%)',
+        zIndex: '0',
+        animationDelay: '0.5s'
+      }}></div>
+      
+      <div className="float-animation" style={{
+        position: 'absolute',
+        bottom: '5%',
+        right: '5%',
+        width: '220px',
+        height: '220px',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(78, 124, 138, 0.1) 0%, rgba(78, 124, 138, 0.05) 70%, transparent 100%)',
+        zIndex: '0',
+        animationDelay: '1s'
+      }}></div>
+      
       {/* Social Media Icons */}
       <div style={{
         position: 'absolute',
-        top: '20px',
-        right: '20px',
+        top: '25px',
+        right: '30px',
         display: 'flex',
-        gap: '15px',
+        gap: '18px',
         zIndex: '2'
       }}>
         <a 
@@ -73,57 +99,81 @@ const Header = () => {
       </div>
       
       <div className="logo" style={{ 
-        marginBottom: '15px',
-        animation: 'fadeIn 1s ease-out',
-        position: 'relative' 
+        marginBottom: '25px',
+        animation: 'pulse 8s infinite ease-in-out',
+        position: 'relative',
+        zIndex: 1,
+        transition: 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)'
       }}>
-        <svg width="70" height="70" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="25" cy="25" r="23" stroke="var(--color-accent)" strokeWidth="2"/>
-          <circle cx="25" cy="25" r="15" stroke="var(--color-accent)" strokeWidth="1.5"/>
-          <circle cx="25" cy="25" r="8" fill="var(--color-accent)" fillOpacity="0.3"/>
+        <svg width="90" height="90" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="2" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
+          <circle cx="25" cy="25" r="23" stroke="var(--color-accent)" strokeWidth="2" filter="url(#glow)" />
+          <circle cx="25" cy="25" r="15" stroke="var(--color-accent)" strokeWidth="1.5" opacity="0.8" />
+          <circle cx="25" cy="25" r="8" fill="var(--color-accent)" fillOpacity="0.3" />
+          <circle cx="25" cy="25" r="4" fill="var(--color-accent)" fillOpacity="0.5" />
         </svg>
       </div>
       
-      <h1 style={{
-        fontSize: '2.8rem',
-        fontWeight: 400,
-        letterSpacing: '6px',
-        margin: '0 0 10px 0',
+      <h1 className="fade-in" style={{
+        fontSize: '3.2rem',
+        fontWeight: 500,
+        letterSpacing: '8px',
+        margin: '0 0 15px 0',
         color: 'var(--color-text)',
         fontFamily: 'var(--font-heading)',
         position: 'relative',
-        display: 'inline-block'
+        display: 'inline-block',
+        textShadow: '0 2px 10px rgba(0,0,0,0.05)'
       }}>
         APERTURE
         <span style={{
           position: 'absolute',
-          bottom: '-5px',
+          bottom: '-8px',
           left: '25%',
           width: '50%',
-          height: '1px',
-          background: 'var(--color-accent)',
-          opacity: '0.5'
+          height: '2px',
+          background: 'linear-gradient(to right, transparent, var(--color-accent), transparent)',
+          opacity: '0.7'
         }}></span>
       </h1>
       
-      <p style={{
-        fontSize: '1rem',
-        letterSpacing: '3px',
+      <p className="fade-in" style={{
+        fontSize: '1.1rem',
+        letterSpacing: '4px',
         textTransform: 'uppercase',
         color: 'var(--color-accent)',
         fontWeight: 300,
-        margin: '0 0 30px 0'
+        margin: '0 0 40px 0',
+        opacity: 0.9,
+        animationDelay: '0.3s'
       }}>
-        Photography Portfolio
+        Automotive Photography
       </p>
       
       <div className="decoration" style={{
-        width: '40px',
+        width: '60px',
         height: '2px',
         background: 'var(--color-accent)',
         margin: '0 auto',
-        opacity: 0.7
-      }}></div>
+        opacity: 0.7,
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <span style={{
+          position: 'absolute',
+          top: 0,
+          left: '-100%',
+          width: '100%',
+          height: '100%',
+          background: 'linear-gradient(to right, transparent, white, transparent)',
+          animation: 'shimmer 3s infinite'
+        }}></span>
+      </div>
     </header>
   );
 };
