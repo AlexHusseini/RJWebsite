@@ -75,48 +75,156 @@ function App() {
     switch (activeTab) {
       case 'home':
         return (
-          <div id="home">
-            <About />
+          <div id="home" className="fade-in">
+            <section style={{
+              maxWidth: '1200px',
+              margin: '0 auto 80px',
+              padding: '0 20px',
+              position: 'relative'
+            }}>
+              {/* Hero Banner */}
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
+                marginBottom: '60px',
+                position: 'relative'
+              }}>
+                <h1 style={{
+                  fontSize: 'clamp(2.5rem, 6vw, 3.8rem)',
+                  fontFamily: 'var(--font-heading)',
+                  marginBottom: '20px',
+                  color: 'var(--color-accent)',
+                  fontWeight: '400',
+                  lineHeight: '1.2'
+                }}>
+                  Capturing Automotive Excellence
+                </h1>
+                
+                <p style={{
+                  fontSize: 'clamp(1.1rem, 3vw, 1.3rem)',
+                  maxWidth: '700px',
+                  marginBottom: '40px',
+                  color: 'var(--color-text)',
+                  fontWeight: '300',
+                  lineHeight: '1.6'
+                }}>
+                  Specializing in custom automotive photography throughout Georgia and beyond. From classic cars to modern builds, I capture the unique character of every vehicle.
+                </p>
+                
+                <div style={{
+                  display: 'flex',
+                  gap: '20px',
+                  marginBottom: '50px',
+                  flexWrap: 'wrap',
+                  justifyContent: 'center'
+                }}>
+                  <button 
+                    onClick={() => handleTabClick('portfolio')}
+                    style={{
+                      background: 'var(--color-accent)',
+                      color: 'white',
+                      border: 'none',
+                      padding: '14px 30px',
+                      borderRadius: '8px',
+                      fontSize: '1rem',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      letterSpacing: '1px',
+                      boxShadow: '0 8px 20px rgba(var(--color-accent-rgb), 0.3)'
+                    }}
+                  >
+                    VIEW PORTFOLIO
+                  </button>
+                  
+                  <button 
+                    onClick={() => handleTabClick('contact')}
+                    style={{
+                      background: 'transparent',
+                      color: 'var(--color-accent)',
+                      border: '2px solid var(--color-accent)',
+                      padding: '14px 30px',
+                      borderRadius: '8px',
+                      fontSize: '1rem',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      letterSpacing: '1px',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    GET IN TOUCH
+                  </button>
+                </div>
+              </div>
+              
+              {/* Featured Images */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                gap: '20px',
+                marginBottom: '60px'
+              }}>
+                {['/images/car_profile.jpg', '/images/car_profile.jpg', '/images/car_profile.jpg'].map((img, index) => (
+                  <div key={index} style={{
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    boxShadow: '0 15px 30px var(--color-shadow)',
+                    transition: 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)',
+                    height: '250px',
+                    '&:hover': {
+                      transform: 'translateY(-10px)'
+                    }
+                  }}>
+                    <img 
+                      src={img} 
+                      alt="Featured photography" 
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        transition: 'transform 0.7s ease'
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+            
+            {/* Featured Work Section */}
             <div style={{ 
               textAlign: 'center', 
               margin: '60px 0',
-              padding: '0 20px' 
+              padding: '0 20px',
+              background: 'var(--color-subtle)',
+              paddingTop: '60px',
+              paddingBottom: '60px'
             }}>
               <h2 style={{
-                fontSize: 'clamp(1.4rem, 4vw, 1.8rem)',
+                fontSize: 'clamp(1.8rem, 4vw, 2.2rem)',
                 fontFamily: 'var(--font-heading)',
                 fontWeight: 400,
-                marginBottom: '20px'
+                marginBottom: '20px',
+                color: 'var(--color-accent)'
               }}>Featured Work</h2>
+              <div className="section-divider"></div>
               <p style={{
-                fontSize: 'clamp(0.95rem, 3vw, 1.05rem)',
-                maxWidth: '600px',
+                fontSize: 'clamp(1rem, 3vw, 1.1rem)',
+                maxWidth: '700px',
                 margin: '0 auto 40px',
                 color: 'var(--color-text)',
-                opacity: 0.8,
                 fontWeight: 300,
                 lineHeight: 1.6
               }}>
-                A curated collection of my best photography across various styles and subjects.
-                Click on the Portfolio tab to explore all my work.
+                A curated collection of my best automotive photography across Georgia and the Southeast. 
+                From muscle cars to exotics, I bring your automotive passion to life through my lens.
               </p>
               <button 
-                onClick={() => setActiveTab('portfolio')}
-                style={{
-                  background: 'var(--color-accent)',
-                  color: 'white',
-                  border: 'none',
-                  padding: 'clamp(10px, 3vw, 12px) clamp(20px, 5vw, 28px)',
-                  borderRadius: '5px',
-                  fontSize: 'clamp(0.85rem, 2vw, 0.9rem)',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  letterSpacing: '1px',
-                  transition: 'all 0.3s ease',
-                  boxShadow: '0 5px 15px rgba(166, 124, 82, 0.2)'
-                }}
+                onClick={() => handleTabClick('portfolio')}
+                className="btn"
               >
-                VIEW FULL PORTFOLIO
+                EXPLORE FULL PORTFOLIO
               </button>
             </div>
           </div>
@@ -141,6 +249,22 @@ function App() {
     setActiveTab('admin');
     // Update URL with a hash to allow for bookmarking/sharing the admin panel
     window.location.hash = 'admin';
+  };
+
+  // Helper function for smooth scrolling
+  const handleTabClick = (tabId) => {
+    setActiveTab(tabId);
+    
+    // Add a small delay to ensure the component is rendered before scrolling
+    setTimeout(() => {
+      const element = document.getElementById(tabId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        // If there's no specific element with that ID, scroll to top for home
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 100);
   };
 
   return (

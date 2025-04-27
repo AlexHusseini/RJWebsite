@@ -150,8 +150,9 @@ const About = () => {
             position: 'relative',
             zIndex: 1
           }}>
-            Hi, I'm RJ Shaheen, a passionate automotive photographer based in New York with over 5 years of professional experience. 
-            I specialize in capturing the elegance and power of classic cars, sports cars, and custom builds.
+            Hi, I'm RJ Shaheen, the photographer behind RS Photography. My journey began when I was just 16, 
+            the day my father handed me his old film camera as we attended my first car show in Atlanta. 
+            Something clicked that day – not just the shutter, but a passion that would define my future.
           </p>
           
           <p style={{ 
@@ -163,9 +164,9 @@ const About = () => {
             position: 'relative',
             zIndex: 1
           }}>
-            My approach combines technical precision with artistic composition to highlight the unique personality of each vehicle. 
-            Whether it's the timeless curves of vintage classics or the aggressive lines of modern supercars, 
-            I strive to create images that evoke emotion and showcase automotive design at its finest.
+            Based in Cumming, Georgia, I've spent the last 5 years developing a style that captures not just the 
+            metal and chrome, but the soul and character of every automobile I photograph. From muscle cars rumbling 
+            through the North Georgia mountains to exotic supercars against Atlanta's skyline, each shoot is a new adventure.
           </p>
           
           <p style={{ 
@@ -177,9 +178,48 @@ const About = () => {
             position: 'relative',
             zIndex: 1
           }}>
-            My work has been featured in various automotive exhibitions and publications including Road & Track, Classic Driver, and Petrolicious. 
-            When I'm not behind the camera, you can find me at car shows, racetracks, or exploring scenic driving routes with my own collection of classic cars.
+            I believe every car has a story – whether it's a restored classic passed down through generations or a 
+            new build representing years of dreams and dedication. My mission is to tell these stories through my lens,
+            creating images that you'll proudly display for years to come.
           </p>
+          
+          <div style={{
+            marginTop: '30px',
+            marginBottom: '30px',
+            padding: '20px',
+            backgroundColor: 'var(--color-accent-light)',
+            borderRadius: '10px',
+            '@media (max-width: 768px)': {
+              textAlign: 'center'
+            }
+          }}>
+            <h4 style={{
+              fontSize: '1.2rem',
+              marginBottom: '15px',
+              color: 'var(--color-accent)',
+              fontWeight: '500'
+            }}>Get In Touch</h4>
+            
+            <div style={{
+              fontSize: '1rem',
+              marginBottom: '10px'
+            }}>
+              <strong>Email:</strong> rj.shaheen03@gmail.com
+            </div>
+            
+            <div style={{
+              fontSize: '1rem',
+              marginBottom: '10px'
+            }}>
+              <strong>Phone:</strong> (678)-428-2235
+            </div>
+            
+            <div style={{
+              fontSize: '1rem'
+            }}>
+              <strong>Location:</strong> Cumming, GA
+            </div>
+          </div>
           
           <div style={{
             marginTop: '30px',

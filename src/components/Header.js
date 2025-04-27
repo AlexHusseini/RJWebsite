@@ -42,7 +42,7 @@ const Header = () => {
           marginBottom: '10px',
           textAlign: 'center'
         }}>
-          RJ Shaheen
+          RS Photography
         </h1>
 
         <div style={{
@@ -53,71 +53,60 @@ const Header = () => {
           opacity: 0.7
         }}></div>
 
-        <div style={{
-          padding: '0 20px',
+        <p style={{
           textAlign: 'center',
-          maxWidth: '500px',
-          margin: '0 auto'
+          maxWidth: '600px',
+          fontSize: '16px',
+          lineHeight: '1.7',
+          marginBottom: '20px',
+          color: 'var(--color-text)',
+          opacity: 0.9
         }}>
-          <p style={{
-            fontSize: '16px',
-            lineHeight: '1.6',
-            marginBottom: '15px'
-          }}>
-            Hi, I'm RJ. I'm a passionate automotive photographer based in New York, specializing in classic cars, sports cars, and custom builds. My work aims to capture the elegance, power, and unique character of exceptional automobiles.
-          </p>
-          
-          <p style={{
-            fontSize: '16px',
-            lineHeight: '1.6',
-            marginBottom: '30px'
-          }}>
-            I've been photographing cars professionally for over 5 years, and my work has been featured in various automotive exhibitions and publications. When I'm not behind the camera, you can find me at car shows, racetracks, or exploring scenic driving routes.
-          </p>
+          Capturing the soul of automobiles across Georgia and beyond. From classic muscle to modern exotics, I bring your pride and joy to life through the lens.
+        </p>
 
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '20px',
-            marginTop: '20px'
-          }}>
-            <a 
-              href="https://www.instagram.com/rs.photography03/"
-              style={{
-                color: 'var(--color-text)',
-                textDecoration: 'none',
-                borderBottom: '2px solid var(--color-accent)',
-                padding: '0 3px 3px',
-                fontSize: '16px'
-              }}
-            >
-              Instagram
-            </a>
-            <a 
-              href="https://twitter.com"
-              style={{
-                color: 'var(--color-text)',
-                textDecoration: 'none',
-                borderBottom: '2px solid var(--color-accent)',
-                padding: '0 3px 3px',
-                fontSize: '16px'
-              }}
-            >
-              Twitter
-            </a>
-            <a 
-              href="https://behance.net"
-              style={{
-                color: 'var(--color-text)',
-                textDecoration: 'none',
-                borderBottom: '2px solid var(--color-accent)',
-                padding: '0 3px 3px',
-                fontSize: '16px'
-              }}
-            >
-              Behance
-            </a>
-          </div>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          gap: '20px',
+          marginTop: '20px'
+        }}>
+          <a 
+            href="https://www.instagram.com/rs.photography03/"
+            style={{
+              color: 'var(--color-text)',
+              textDecoration: 'none',
+              borderBottom: '2px solid var(--color-accent)',
+              padding: '0 3px 3px',
+              fontSize: '16px'
+            }}
+          >
+            Instagram
+          </a>
+          <a 
+            href="https://twitter.com"
+            style={{
+              color: 'var(--color-text)',
+              textDecoration: 'none',
+              borderBottom: '2px solid var(--color-accent)',
+              padding: '0 3px 3px',
+              fontSize: '16px'
+            }}
+          >
+            Twitter
+          </a>
+          <a 
+            href="https://behance.net"
+            style={{
+              color: 'var(--color-text)',
+              textDecoration: 'none',
+              borderBottom: '2px solid var(--color-accent)',
+              padding: '0 3px 3px',
+              fontSize: '16px'
+            }}
+          >
+            Behance
+          </a>
         </div>
       </div>
     </header>
