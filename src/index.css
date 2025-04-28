@@ -820,27 +820,23 @@ input:focus + label, textarea:focus + label, select:focus + label {
     height: 180px !important;
     overflow: hidden !important;
     position: relative !important;
+    margin: 0 auto !important;
   }
   
   .profile-image {
-    position: absolute !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) scale(1.15) !important;
-    min-width: 100% !important;
-    min-height: 100% !important;
-    width: auto !important;
-    height: auto !important;
-    max-width: none !important;
-    max-height: none !important;
+    width: 100% !important;
+    height: 100% !important;
     object-fit: cover !important;
+    object-position: center center !important;
+    position: static !important;
+    transform: none !important;
   }
 }
 
-/* Additional iPhone fix */
+/* Additional iPhone fix - removing scaling completely */
 @supports (-webkit-touch-callout: none) {
   .profile-image {
-    transform: translate(-50%, -50%) scale(1.2) !important;
+    transform: none !important;
   }
 }
 
