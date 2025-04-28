@@ -72,12 +72,25 @@ const LoginModal = ({ onClose, onLogin }) => {
             position: 'absolute',
             top: '15px',
             right: '15px',
-            background: 'none',
-            border: 'none',
-            fontSize: '20px',
+            background: 'rgba(0, 0, 0, 0.7)',
+            border: '2px solid white',
+            color: 'white',
+            fontSize: '24px',
+            fontWeight: 'bold',
             cursor: 'pointer',
-            opacity: 0.7
+            opacity: 1,
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)',
+            zIndex: 1001,
+            padding: 0,
+            lineHeight: '1'
           }}
+          aria-label="Close login modal"
         >
           ×
         </button>
