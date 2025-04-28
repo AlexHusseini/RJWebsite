@@ -1,19 +1,25 @@
 import React, { useState, useEffect } from 'react';
+import './App.css';
 import Header from './components/Header';
+import Navigation from './components/Navigation';
 import About from './components/About';
 import Gallery from './components/Gallery';
-import Navigation from './components/Navigation';
 import Contact from './components/Contact';
 import AdminPanel from './components/AdminPanel';
-import LoginModal from './components/LoginModal';
 import Footer from './components/Footer';
+import LoginModal from './components/LoginModal';
 import { checkSession } from './auth/authUtils';
+import { getSettings } from './firebase/db';
 
 function App() {
   console.log('App component rendering');
+  
+  // State management
   const [activeTab, setActiveTab] = useState('home');
-  const [showLoginModal, setShowLoginModal] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [settings, setSettings] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
   
   useEffect(() => {
@@ -40,6 +46,22 @@ function App() {
     };
   }, []);
   
+  // Fetch website settings
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const settingsData = await getSettings();
+        setSettings(settingsData);
+      } catch (error) {
+        console.error("Error fetching settings:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchSettings();
+  }, []);
+
   // Check for existing session on load
   useEffect(() => {
     console.log('App useEffect running');
@@ -78,75 +100,45 @@ function App() {
           <div id="home" className="fade-in">
             <section style={{
               maxWidth: '1200px',
-              margin: '0 auto 80px',
-              padding: '0 20px',
-              position: 'relative'
+              margin: '0 auto 60px',
+              padding: '40px 20px',
+              position: 'relative',
+              zIndex: 1
             }}>
-              {/* Hero Banner */}
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
+              <div style={{ 
                 textAlign: 'center',
-                marginBottom: '60px',
-                position: 'relative'
+                marginBottom: '40px'
               }}>
-                <h1 style={{
-                  fontSize: 'clamp(2.5rem, 6vw, 3.8rem)',
+                <h2 style={{
+                  fontSize: 'clamp(1.8rem, 4vw, 2.2rem)',
                   fontFamily: 'var(--font-heading)',
+                  fontWeight: 400,
                   marginBottom: '20px',
-                  color: 'var(--color-accent)',
-                  fontWeight: '400',
-                  lineHeight: '1.2'
-                }}>
-                  Capturing Automotive Excellence
-                </h1>
-                
+                  color: 'var(--color-accent)'
+                }}>Welcome</h2>
+                <div className="section-divider"></div>
                 <p style={{
-                  fontSize: 'clamp(1.1rem, 3vw, 1.3rem)',
+                  fontSize: 'clamp(1rem, 3vw, 1.1rem)',
                   maxWidth: '700px',
-                  marginBottom: '40px',
+                  margin: '0 auto 40px',
                   color: 'var(--color-text)',
-                  fontWeight: '300',
-                  lineHeight: '1.6'
+                  fontWeight: 300,
+                  lineHeight: 1.6
                 }}>
-                  Specializing in custom automotive photography throughout Georgia and beyond. From classic cars to modern builds, I capture the unique character of every vehicle.
+                  I'm RS, a professional automotive photographer based in Georgia. 
+                  I specialize in capturing the essence and beauty of automobiles, 
+                  from classic vintage cars to modern sports cars and everything in between.
                 </p>
-                
-                <div style={{
-                  display: 'flex',
-                  gap: '20px',
-                  marginBottom: '50px',
-                  flexWrap: 'wrap',
-                  justifyContent: 'center'
-                }}>
-                  <button 
-                    onClick={() => handleTabClick('portfolio')}
-                    style={{
-                      background: 'var(--color-accent)',
-                      color: 'white',
-                      border: 'none',
-                      padding: '14px 30px',
-                      borderRadius: '8px',
-                      fontSize: '1rem',
-                      fontWeight: '500',
-                      cursor: 'pointer',
-                      letterSpacing: '1px',
-                      boxShadow: '0 8px 20px rgba(var(--color-accent-rgb), 0.3)'
-                    }}
-                  >
-                    VIEW PORTFOLIO
-                  </button>
-                  
+                <div>
                   <button 
                     onClick={() => handleTabClick('contact')}
                     style={{
-                      background: 'transparent',
-                      color: 'var(--color-accent)',
-                      border: '2px solid var(--color-accent)',
-                      padding: '14px 30px',
-                      borderRadius: '8px',
+                      display: 'inline-block',
+                      padding: '12px 30px',
+                      backgroundColor: 'var(--color-accent)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '5px',
                       fontSize: '1rem',
                       fontWeight: '500',
                       cursor: 'pointer',
@@ -166,7 +158,8 @@ function App() {
                 gap: '20px',
                 marginBottom: '60px'
               }}>
-                {['/images/car_profile.jpg', '/images/car_profile.jpg', '/images/car_profile.jpg'].map((img, index) => (
+                {!loading && settings && settings.homepagePhotos && 
+                 settings.homepagePhotos.map((img, index) => (
                   <div key={index} style={{
                     borderRadius: '12px',
                     overflow: 'hidden',

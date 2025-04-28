@@ -1,6 +1,27 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { getSettings } from '../firebase/db';
 
 const Header = () => {
+  const [profilePhoto, setProfilePhoto] = useState('/images/car_profile.jpg');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const settingsData = await getSettings();
+        if (settingsData && settingsData.profilePhoto) {
+          setProfilePhoto(settingsData.profilePhoto);
+        }
+      } catch (error) {
+        console.error("Error fetching profile photo:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchSettings();
+  }, []);
+
   return (
     <header style={{
       width: '100%',
@@ -26,7 +47,7 @@ const Header = () => {
           position: 'relative'
         }}>
           <img
-            src="/images/car_profile.jpg"
+            src={profilePhoto}
             alt="Classic Porsche"
             className="profile-image"
             style={{

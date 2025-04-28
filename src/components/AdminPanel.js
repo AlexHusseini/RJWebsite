@@ -7,7 +7,10 @@ import {
   getSections, 
   addSection, 
   deleteSection, 
-  updatePhotoSection 
+  updatePhotoSection,
+  getSettings,
+  updateHomepagePhotos,
+  updateProfilePhoto
 } from '../firebase/db';
 import { uploadPhoto, deletePhoto } from '../firebase/storage';
 
@@ -30,14 +33,18 @@ const AdminPanel = ({ onLogout }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
+  const [settings, setSettings] = useState(null);
+  const [selectedHomepagePhotos, setSelectedHomepagePhotos] = useState([null, null, null]);
+  const [selectedProfilePhoto, setSelectedProfilePhoto] = useState(null);
 
-  // Load photos and sections on component mount
+  // Load photos, sections, and settings on component mount
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [loadedPhotos, loadedSections] = await Promise.all([
+        const [loadedPhotos, loadedSections, loadedSettings] = await Promise.all([
           getPhotos(),
-          getSections()
+          getSections(),
+          getSettings()
         ]);
         
         // If no sections exist in Firestore, add only the essential ones
@@ -71,6 +78,19 @@ const AdminPanel = ({ onLogout }) => {
         }
         
         setPhotos(loadedPhotos);
+        setSections(loadedSections);
+        setSettings(loadedSettings);
+        
+        // Initialize selected photos from settings
+        if (loadedSettings) {
+          if (loadedSettings.homepagePhotos) {
+            setSelectedHomepagePhotos(loadedSettings.homepagePhotos);
+          }
+          if (loadedSettings.profilePhoto) {
+            setSelectedProfilePhoto(loadedSettings.profilePhoto);
+          }
+        }
+        
         setError(null);
       } catch (error) {
         console.error("Error loading data:", error);
@@ -315,6 +335,48 @@ const AdminPanel = ({ onLogout }) => {
     }
   };
 
+  // Handle selecting a photo for homepage
+  const handleSelectHomepagePhoto = (photoUrl, index) => {
+    const updatedPhotos = [...selectedHomepagePhotos];
+    updatedPhotos[index] = photoUrl;
+    setSelectedHomepagePhotos(updatedPhotos);
+  };
+
+  // Handle selecting a photo for profile picture
+  const handleSelectProfilePhoto = (photoUrl) => {
+    setSelectedProfilePhoto(photoUrl);
+  };
+
+  // Save homepage photos to settings
+  const handleSaveHomepagePhotos = async () => {
+    try {
+      setIsLoading(true);
+      await updateHomepagePhotos(selectedHomepagePhotos);
+      setShowSuccess('Homepage photos updated successfully!');
+    } catch (error) {
+      console.error('Error updating homepage photos:', error);
+      setError('Failed to update homepage photos. Please try again.');
+    } finally {
+      setIsLoading(false);
+      setTimeout(() => setShowSuccess(''), 3000);
+    }
+  };
+
+  // Save profile photo to settings
+  const handleSaveProfilePhoto = async () => {
+    try {
+      setIsLoading(true);
+      await updateProfilePhoto(selectedProfilePhoto);
+      setShowSuccess('Profile photo updated successfully!');
+    } catch (error) {
+      console.error('Error updating profile photo:', error);
+      setError('Failed to update profile photo. Please try again.');
+    } finally {
+      setIsLoading(false);
+      setTimeout(() => setShowSuccess(''), 3000);
+    }
+  };
+
   if (isLoading) {
     return (
       <div style={{
@@ -411,6 +473,199 @@ const AdminPanel = ({ onLogout }) => {
           }}>{showSuccess}</p>
         </div>
       )}
+
+      {/* Website Settings Management */}
+      <div style={{
+        background: 'white',
+        borderRadius: '8px',
+        boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
+        padding: '30px',
+        marginBottom: '50px'
+      }}>
+        <h3 style={{
+          fontSize: '1.4rem',
+          marginBottom: '20px',
+          fontFamily: 'var(--font-heading)',
+          color: 'var(--color-accent)'
+        }}>Website Settings</h3>
+
+        {/* Homepage Photos */}
+        <div style={{ marginBottom: '30px' }}>
+          <h4 style={{
+            fontSize: '1.1rem',
+            marginBottom: '15px',
+            color: 'var(--color-text)'
+          }}>Homepage Featured Photos</h4>
+          
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '20px',
+            marginBottom: '20px',
+            '@media (max-width: 768px)': {
+              gridTemplateColumns: '1fr'
+            }
+          }}>
+            {selectedHomepagePhotos.map((photoUrl, index) => (
+              <div key={index} style={{
+                border: '1px solid var(--color-subtle)',
+                borderRadius: '5px',
+                overflow: 'hidden',
+                height: '200px',
+                position: 'relative'
+              }}>
+                {photoUrl ? (
+                  <img 
+                    src={photoUrl} 
+                    alt={`Homepage photo ${index + 1}`}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
+                    }}
+                  />
+                ) : (
+                  <div style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: 'var(--color-subtle)',
+                    color: 'var(--color-text)',
+                    opacity: 0.7
+                  }}>
+                    No photo selected
+                  </div>
+                )}
+                <div style={{
+                  position: 'absolute',
+                  bottom: '10px',
+                  left: '10px',
+                  right: '10px',
+                  background: 'rgba(255,255,255,0.8)',
+                  padding: '8px',
+                  borderRadius: '4px',
+                  textAlign: 'center',
+                  fontSize: '0.85rem'
+                }}>
+                  Photo {index + 1}
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <button
+            onClick={handleSaveHomepagePhotos}
+            style={{
+              background: 'var(--color-accent)',
+              color: 'white',
+              border: 'none',
+              padding: '10px 20px',
+              borderRadius: '5px',
+              fontSize: '0.95rem',
+              fontWeight: '500',
+              cursor: 'pointer',
+              transition: 'background-color 0.3s ease',
+              letterSpacing: '1px',
+              marginBottom: '20px'
+            }}
+          >
+            SAVE HOMEPAGE PHOTOS
+          </button>
+          
+          <p style={{
+            fontSize: '0.9rem',
+            opacity: 0.8,
+            marginBottom: '20px'
+          }}>
+            Select photos from your gallery below to update the homepage featured photos.
+          </p>
+        </div>
+        
+        {/* Profile Photo */}
+        <div style={{ marginBottom: '30px' }}>
+          <h4 style={{
+            fontSize: '1.1rem',
+            marginBottom: '15px',
+            color: 'var(--color-text)'
+          }}>Profile Photo</h4>
+          
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '20px',
+            marginBottom: '20px',
+            '@media (max-width: 768px)': {
+              flexDirection: 'column',
+              alignItems: 'flex-start'
+            }
+          }}>
+            <div style={{
+              width: '150px',
+              height: '150px',
+              borderRadius: '50%',
+              overflow: 'hidden',
+              border: '1px solid var(--color-subtle)',
+            }}>
+              {selectedProfilePhoto ? (
+                <img 
+                  src={selectedProfilePhoto} 
+                  alt="Profile"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                />
+              ) : (
+                <div style={{
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: 'var(--color-subtle)',
+                  color: 'var(--color-text)',
+                  opacity: 0.7,
+                  fontSize: '0.85rem',
+                  textAlign: 'center',
+                  padding: '10px'
+                }}>
+                  No profile photo selected
+                </div>
+              )}
+            </div>
+            
+            <div>
+              <button
+                onClick={handleSaveProfilePhoto}
+                style={{
+                  background: 'var(--color-accent)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '5px',
+                  fontSize: '0.95rem',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.3s ease',
+                  letterSpacing: '1px',
+                  marginBottom: '10px'
+                }}
+              >
+                SAVE PROFILE PHOTO
+              </button>
+              <p style={{
+                fontSize: '0.9rem',
+                opacity: 0.8,
+              }}>
+                Select a photo from your gallery below to update your profile photo.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Section Management */}
       <div style={{
@@ -796,59 +1051,109 @@ const AdminPanel = ({ onLogout }) => {
                   <div style={{ 
                     display: 'flex',
                     justifyContent: 'space-between',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '5px'
                   }}>
                     <div style={{ opacity: 0.8 }}>
                       {sections.find(s => s.id === photo.section)?.label}
                     </div>
                     <div style={{
-                      position: 'relative',
-                      marginLeft: '8px',
-                      width: '100px'
+                      display: 'flex',
+                      gap: '5px'
                     }}>
+                      <div style={{
+                        position: 'relative',
+                        marginLeft: '8px',
+                        width: '100px'
+                      }}>
+                        <select
+                          onChange={(e) => handleMovePhoto(photo.id, e.target.value)}
+                          value=""
+                          style={{
+                            padding: '3px 8px',
+                            fontSize: '0.8rem',
+                            borderRadius: '3px',
+                            border: '1px solid rgba(166, 124, 82, 0.5)',
+                            backgroundColor: 'rgba(0,0,0,0.7)',
+                            color: 'white',
+                            cursor: 'pointer',
+                            width: '100%'
+                          }}
+                        >
+                          <option value="" disabled>Move to...</option>
+                          {sections
+                            .filter(s => s.id !== photo.section)
+                            .map(section => (
+                              <option key={section.id} value={section.id}>
+                                {section.label}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+                      
+                      <button
+                        onClick={() => handleDeletePhoto(photo.id, photo.url)}
+                        style={{
+                          background: 'rgba(255, 68, 68, 0.7)',
+                          border: 'none',
+                          color: 'white',
+                          borderRadius: '3px',
+                          padding: '3px 8px',
+                          fontSize: '0.8rem',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Selection options for website settings */}
+                  <div style={{
+                    marginTop: '8px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    borderTop: '1px solid rgba(255,255,255,0.2)',
+                    paddingTop: '8px'
+                  }}>
+                    <div>
                       <select
-                        onChange={(e) => handleMovePhoto(photo.id, e.target.value)}
+                        onChange={(e) => handleSelectHomepagePhoto(photo.url, parseInt(e.target.value))}
                         value=""
                         style={{
                           padding: '3px 8px',
                           fontSize: '0.8rem',
                           borderRadius: '3px',
-                          border: '1px solid rgba(166, 124, 82, 0.5)',
-                          backgroundColor: 'rgba(0,0,0,0.7)',
+                          backgroundColor: 'rgba(0,0,0,0.5)',
                           color: 'white',
-                          cursor: 'pointer',
-                          width: '100%'
+                          border: '1px solid rgba(255,255,255,0.3)',
+                          cursor: 'pointer'
                         }}
                       >
-                        <option value="" disabled>Move to...</option>
-                        {sections
-                          .filter(s => s.id !== photo.section)
-                          .map(section => (
-                            <option key={section.id} value={section.id}>
-                              {section.label}
-                            </option>
-                          ))}
+                        <option value="" disabled>Add to homepage</option>
+                        <option value="0">Homepage 1</option>
+                        <option value="1">Homepage 2</option>
+                        <option value="2">Homepage 3</option>
                       </select>
                     </div>
+                    
+                    <button
+                      onClick={() => handleSelectProfilePhoto(photo.url)}
+                      style={{
+                        background: 'rgba(0,0,0,0.5)',
+                        border: '1px solid rgba(255,255,255,0.3)',
+                        color: 'white',
+                        borderRadius: '3px',
+                        padding: '3px 8px',
+                        fontSize: '0.8rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Use as Profile
+                    </button>
                   </div>
                 </div>
-                <button
-                  onClick={() => handleDeletePhoto(photo.id, photo.url)}
-                  style={{
-                    position: 'absolute',
-                    top: '10px',
-                    right: '10px',
-                    background: 'rgba(255,68,68,0.9)',
-                    color: 'white',
-                    border: 'none',
-                    padding: '5px 10px',
-                    borderRadius: '3px',
-                    cursor: 'pointer',
-                    fontSize: '0.8rem'
-                  }}
-                >
-                  Delete
-                </button>
               </div>
             ))}
           </div>

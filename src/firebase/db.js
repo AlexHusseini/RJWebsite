@@ -16,6 +16,7 @@ import { db } from './config';
 // Local storage keys
 const PHOTOS_KEY = 'portfolio_photos';
 const SECTIONS_KEY = 'portfolio_sections';
+const SETTINGS_KEY = 'website_settings';
 
 // Default sections
 const DEFAULT_SECTIONS = [
@@ -25,6 +26,16 @@ const DEFAULT_SECTIONS = [
   { id: 'street', label: 'Street' },
   { id: 'architecture', label: 'Architecture' }
 ];
+
+// Default settings
+const DEFAULT_SETTINGS = {
+  homepagePhotos: [
+    '/images/car_profile.jpg',
+    '/images/car_profile.jpg',
+    '/images/car_profile.jpg'
+  ],
+  profilePhoto: '/images/car_profile.jpg'
+};
 
 // Constants for free tier limits
 const MAX_DAILY_READS = 50000;
@@ -250,4 +261,60 @@ export const updatePhotoSection = async (photoId, newSectionId) => {
     console.error("Error updating photo section: ", error);
     throw error;
   }
+};
+
+// Settings operations
+export const getSettings = async () => {
+  try {
+    checkOperationLimit('read');
+    const settingsRef = doc(db, 'settings', 'website');
+    const docSnap = await getDoc(settingsRef);
+    
+    if (docSnap.exists()) {
+      return docSnap.data();
+    } else {
+      // If settings don't exist yet, create with defaults
+      await setDoc(settingsRef, DEFAULT_SETTINGS);
+      return DEFAULT_SETTINGS;
+    }
+  } catch (error) {
+    console.error("Error getting settings: ", error);
+    // Return defaults if there's an error
+    return DEFAULT_SETTINGS;
+  }
+};
+
+export const updateSettings = async (settingsData) => {
+  try {
+    checkOperationLimit('write');
+    const settingsRef = doc(db, 'settings', 'website');
+    
+    // First check if doc exists
+    const docSnap = await getDoc(settingsRef);
+    
+    if (docSnap.exists()) {
+      // Update existing document
+      await updateDoc(settingsRef, settingsData);
+    } else {
+      // Create new document
+      await setDoc(settingsRef, {
+        ...DEFAULT_SETTINGS,
+        ...settingsData
+      });
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error updating settings: ", error);
+    throw error;
+  }
+};
+
+// Specific update functions for frontend use
+export const updateHomepagePhotos = async (photos) => {
+  return await updateSettings({ homepagePhotos: photos });
+};
+
+export const updateProfilePhoto = async (photoUrl) => {
+  return await updateSettings({ profilePhoto: photoUrl });
 }; 
