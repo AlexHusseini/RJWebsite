@@ -292,6 +292,9 @@ const Gallery = () => {
               style={{
                 width: '100%',
                 height: 'auto',
+                maxWidth: '1200px',
+                maxHeight: '80vh',
+                objectFit: 'contain',
                 boxShadow: '0 5px 25px rgba(0,0,0,0.2)',
                 border: '5px solid white',
                 display: 'block'
