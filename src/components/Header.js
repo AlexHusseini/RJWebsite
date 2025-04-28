@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getSettings } from '../firebase/db';
 
 const Header = () => {
-  const [profilePhoto, setProfilePhoto] = useState('/images/car_profile.jpg');
+  const [profilePhoto, setProfilePhoto] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -44,19 +44,40 @@ const Header = () => {
           overflow: 'hidden',
           marginBottom: '30px',
           boxShadow: '0 5px 15px rgba(0,0,0,0.1)',
-          position: 'relative'
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'var(--color-subtle)'
         }}>
-          <img
-            src={profilePhoto}
-            alt="Classic Porsche"
-            className="profile-image"
-            style={{
-              width: '100%',
+          {profilePhoto && (
+            <img
+              src={profilePhoto}
+              alt="Profile"
+              className="profile-image"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center center'
+              }}
+            />
+          )}
+          {loading && (
+            <div style={{
+              position: 'absolute',
+              width: '100%', 
               height: '100%',
-              objectFit: 'cover',
-              objectPosition: 'center center'
-            }}
-          />
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'var(--color-subtle)',
+              color: 'var(--color-text)',
+              opacity: 0.7
+            }}>
+              Loading...
+            </div>
+          )}
         </div>
 
         <h1 style={{

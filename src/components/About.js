@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getSettings } from '../firebase/db';
 
 const About = () => {
-  const [profilePhoto, setProfilePhoto] = useState('/images/car_profile.jpg');
+  const [profilePhoto, setProfilePhoto] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -102,20 +102,37 @@ const About = () => {
               transform: 'rotateY(0deg) rotateX(0deg)'
             }
           }}>
-            <img 
-              src={profilePhoto} 
-              alt="Profile Photo" 
-              style={{
-                width: '100%',
-                height: 'auto',
-                aspectRatio: '1/1',
-                objectFit: 'cover',
-                transition: 'transform 0.7s cubic-bezier(0.22, 1, 0.36, 1)',
-                '&:hover': {
-                  transform: 'scale(1.05)'
-                }
-              }}
-            />
+            {profilePhoto && (
+              <img 
+                src={profilePhoto} 
+                alt="Profile Photo" 
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  aspectRatio: '1/1',
+                  objectFit: 'cover',
+                  transition: 'transform 0.7s cubic-bezier(0.22, 1, 0.36, 1)',
+                  '&:hover': {
+                    transform: 'scale(1.05)'
+                  }
+                }}
+              />
+            )}
+            {loading && (
+              <div style={{
+                position: 'absolute',
+                width: '100%', 
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: 'var(--color-subtle)',
+                color: 'var(--color-text)',
+                opacity: 0.7
+              }}>
+                Loading...
+              </div>
+            )}
             <div style={{
               position: 'absolute',
               inset: 0,
