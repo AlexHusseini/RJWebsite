@@ -1,6 +1,27 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { getSettings } from '../firebase/db';
 
 const About = () => {
+  const [profilePhoto, setProfilePhoto] = useState('/images/car_profile.jpg');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const settingsData = await getSettings();
+        if (settingsData && settingsData.profilePhoto) {
+          setProfilePhoto(settingsData.profilePhoto);
+        }
+      } catch (error) {
+        console.error("Error fetching profile photo:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchSettings();
+  }, []);
+
   return (
     <section id="about" className="fade-in" style={{
       maxWidth: '1000px',
@@ -82,8 +103,8 @@ const About = () => {
             }
           }}>
             <img 
-              src="/images/car_profile.jpg" 
-              alt="Classic Silver Porsche" 
+              src={profilePhoto} 
+              alt="Profile Photo" 
               style={{
                 width: '100%',
                 height: 'auto',

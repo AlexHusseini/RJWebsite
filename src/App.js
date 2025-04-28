@@ -152,20 +152,22 @@ function App() {
               </div>
               
               {/* Featured Images */}
-              <div style={{
+              <div className="featured-images-container" style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
                 gap: '20px',
                 marginBottom: '60px'
               }}>
                 {!loading && settings && settings.homepagePhotos && 
                  settings.homepagePhotos.map((img, index) => (
-                  <div key={index} style={{
+                  <div key={index} className="featured-image-item" style={{
                     borderRadius: '12px',
                     overflow: 'hidden',
                     boxShadow: '0 15px 30px var(--color-shadow)',
                     transition: 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)',
-                    height: '250px',
+                    height: '0',
+                    paddingBottom: '75%',
+                    position: 'relative',
                     '&:hover': {
                       transform: 'translateY(-10px)'
                     }
@@ -174,6 +176,9 @@ function App() {
                       src={img} 
                       alt="Featured photography" 
                       style={{
+                        position: 'absolute',
+                        top: '0',
+                        left: '0',
                         width: '100%',
                         height: '100%',
                         objectFit: 'cover',

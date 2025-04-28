@@ -843,3 +843,32 @@ input:focus + label, textarea:focus + label, select:focus + label {
     transform: translate(-50%, -50%) scale(1.2) !important;
   }
 }
+
+/* Mobile responsive fixes for featured images */
+@media screen and (max-width: 480px) {
+  /* Homepage featured images container */
+  .featured-images-container {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 15px !important;
+  }
+  
+  /* Each featured image item */
+  .featured-image-item {
+    width: 100% !important;
+    margin-bottom: 15px !important;
+    height: 0 !important;
+    padding-bottom: 75% !important;
+    position: relative !important;
+  }
+  
+  /* Featured image */
+  .featured-image-item img {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+}
