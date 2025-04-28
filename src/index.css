@@ -800,6 +800,22 @@ input:focus + label, textarea:focus + label, select:focus + label {
   .gallery-container {
     padding-bottom: 30px !important;
   }
+  
+  /* Fix for gallery photos on mobile ONLY */
+  .gallery-item img {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    transform: none !important; /* Prevent any transform that might cause cutoff */
+  }
+  
+  /* Fix hover state on mobile */
+  .gallery-item:hover img {
+    transform: none !important;
+  }
 }
 
 /* Profile image fixes for mobile */
