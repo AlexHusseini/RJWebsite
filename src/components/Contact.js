@@ -1,14 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     subject: '',
-    message: ''
+    message: '',
+    _honey: '' // Honeypot field
   });
   
   const [formStatus, setFormStatus] = useState(null);
+  const [submitDisabled, setSubmitDisabled] = useState(false);
+  const [cooldownTime, setCooldownTime] = useState(0);
+
+  useEffect(() => {
+    // Check if there's a stored submission timestamp
+    const lastSubmission = localStorage.getItem('lastFormSubmission');
+    if (lastSubmission) {
+      const timeSinceSubmission = Date.now() - parseInt(lastSubmission, 10);
+      const cooldownPeriod = 60000; // 1 minute cooldown
+      
+      if (timeSinceSubmission < cooldownPeriod) {
+        const remainingTime = Math.ceil((cooldownPeriod - timeSinceSubmission) / 1000);
+        setCooldownTime(remainingTime);
+        setSubmitDisabled(true);
+        
+        const timer = setInterval(() => {
+          setCooldownTime(prev => {
+            if (prev <= 1) {
+              clearInterval(timer);
+              setSubmitDisabled(false);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+        
+        return () => clearInterval(timer);
+      }
+    }
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,7 +51,28 @@ const Contact = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // If honeypot field is filled, silently reject the submission
+    if (formData._honey) {
+      console.log('Bot submission detected');
+      setFormStatus('success'); // Fake success to avoid giving feedback to bots
+      return;
+    }
+    
+    // Additional validation
+    if (formData.email.includes('script') || formData.message.includes('script')) {
+      setFormStatus('error');
+      return;
+    }
+    
+    // Check message length
+    if (formData.message.length > 1000) {
+      setFormStatus('error');
+      return;
+    }
+    
     setFormStatus('pending');
+    setSubmitDisabled(true);
     
     // Basic input sanitization
     const sanitizedData = {
@@ -41,19 +93,37 @@ const Contact = () => {
       });
       
       if (response.ok) {
+        // Store submission timestamp for cooldown
+        localStorage.setItem('lastFormSubmission', Date.now().toString());
+        
         setFormStatus('success');
         setFormData({
           name: '',
           email: '',
           subject: '',
-          message: ''
+          message: '',
+          _honey: ''
         });
+        
+        // Set cooldown
+        setCooldownTime(60);
+        const timer = setInterval(() => {
+          setCooldownTime(prev => {
+            if (prev <= 1) {
+              clearInterval(timer);
+              setSubmitDisabled(false);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
       } else {
         throw new Error('Failed to send message');
       }
     } catch (error) {
       console.error('Form submission error:', error);
       setFormStatus('error');
+      setSubmitDisabled(false);
     }
     
     // Reset status after 5 seconds
@@ -241,6 +311,7 @@ const Contact = () => {
                   value={formData.name}
                   onChange={handleChange}
                   required
+                  maxLength={100}
                 />
               </div>
               
@@ -253,6 +324,7 @@ const Contact = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
+                  maxLength={100}
                 />
               </div>
               
@@ -265,6 +337,7 @@ const Contact = () => {
                   value={formData.subject}
                   onChange={handleChange}
                   required
+                  maxLength={150}
                 />
               </div>
               
@@ -277,17 +350,44 @@ const Contact = () => {
                   onChange={handleChange}
                   required
                   rows={5}
+                  maxLength={1000}
                   style={{ resize: 'vertical', fontFamily: 'inherit' }}
+                />
+              </div>
+              
+              {/* Honeypot field - hidden from users but bots might fill it */}
+              <div style={{ display: 'none' }}>
+                <label htmlFor="_honey">Leave this empty</label>
+                <input
+                  type="text"
+                  id="_honey"
+                  name="_honey"
+                  value={formData._honey}
+                  onChange={handleChange}
+                  tabIndex={-1}
+                  autoComplete="off"
                 />
               </div>
               
               <button
                 type="submit"
                 className="btn"
-                disabled={formStatus === 'pending'}
+                disabled={submitDisabled || formStatus === 'pending'}
               >
-                {formStatus === 'pending' ? 'SENDING...' : 'SEND MESSAGE'}
+                {formStatus === 'pending' ? 'SENDING...' : 
+                 cooldownTime > 0 ? `WAIT (${cooldownTime}s)` : 'SEND MESSAGE'}
               </button>
+              
+              {cooldownTime > 0 && formStatus !== 'pending' && formStatus !== 'success' && (
+                <p style={{ 
+                  fontSize: '0.85rem', 
+                  color: 'var(--color-text)', 
+                  opacity: 0.7,
+                  marginTop: '10px' 
+                }}>
+                  Please wait {cooldownTime} seconds before sending another message
+                </p>
+              )}
             </form>
           )}
         </div>
