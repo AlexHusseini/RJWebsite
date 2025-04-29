@@ -18,7 +18,7 @@ const Footer = () => {
         <p style={{ marginTop: '8px' }}>
           Designed & Developed by{' '}
           <a 
-            href="https://www.linkedin.com/in/alexander-husseini-547a10314/" 
+            href="https://alexhusseini.com/" 
             target="_blank" 
             rel="noopener noreferrer"
             style={{
