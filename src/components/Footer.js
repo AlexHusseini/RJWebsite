@@ -33,6 +33,9 @@ const Footer = () => {
             Alexander Husseini
           </a>
         </p>
+        <p style={{ marginTop: '12px' }}>
+          <a href="#admin" className="footer-admin-link">Admin</a>
+        </p>
       </div>
     </footer>
   );

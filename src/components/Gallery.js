@@ -6,11 +6,11 @@ import { getSections } from '../firebase/db';
 const Gallery = () => {
   const [photos, setPhotos] = useState([]);
   const [sections, setSections] = useState([]);
-  const [loaded, setLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('all');
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [error, setError] = useState('');
+  const [failedIds, setFailedIds] = useState(() => new Set());
 
   // Fetch sections from database
   useEffect(() => {
@@ -36,22 +36,18 @@ const Gallery = () => {
   useEffect(() => {
     const loadPhotos = async () => {
       try {
-        setLoaded(false);
         setLoading(true);
         
         // Fetch photos based on active section
         const photosData = activeSection === 'all' ? await getPhotos() : await getPhotos(activeSection);
         setPhotos(photosData);
+        setFailedIds(new Set());
         setError('');
       } catch (error) {
         console.error('Error loading photos:', error);
         setError('Failed to load photos. Please try again later.');
       } finally {
         setLoading(false);
-        // Add a small delay to trigger fade-in animation
-        setTimeout(() => {
-          setLoaded(true);
-        }, 300);
       }
     };
 
@@ -66,10 +62,17 @@ const Gallery = () => {
     : photos.filter(photo => photo.section === activeSection);
 
   const handleSectionChange = (sectionId) => {
-    setLoaded(false);
     setSelectedPhoto(null);
     setActiveSection(sectionId);
   };
+
+  const visiblePhotos = filteredPhotos.filter((photo) => {
+    if (failedIds.has(photo.id)) return false;
+    const src = photo.thumbnailUrl || photo.url || '';
+    // Expired ImageKit hosts hang the browser; skip them.
+    if (src.includes('media-hosting.imagekit.io')) return false;
+    return Boolean(src);
+  });
 
   const openPhotoDetail = (photo) => {
     setSelectedPhoto(photo);
@@ -113,7 +116,7 @@ const Gallery = () => {
         }}>
           Loading photos...
         </div>
-      ) : filteredPhotos.length === 0 ? (
+      ) : visiblePhotos.length === 0 ? (
         <div style={{
           textAlign: 'center',
           padding: '40px',
@@ -143,46 +146,45 @@ const Gallery = () => {
         </div>
       ) : (
         <div className="gallery-grid">
-          {filteredPhotos.map((photo) => (
+          {visiblePhotos.map((photo, index) => (
             <div 
               key={photo.id} 
               className="gallery-item"
               style={{
                 overflow: 'hidden',
                 borderRadius: '5px',
-                opacity: loaded ? 1 : 0,
-                transform: loaded ? 'translateY(0)' : 'translateY(20px)',
-                transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
-                transitionDelay: `${(photo.id % 5) * 0.1}s`,
-                marginBottom: '5px',
                 cursor: 'pointer',
                 boxShadow: '0 5px 15px rgba(0,0,0,0.08)',
-                background: 'white'
+                background: 'var(--color-subtle)',
+                aspectRatio: photo.aspectRatio ? `${photo.aspectRatio}` : undefined,
               }}
               onClick={() => openPhotoDetail(photo)}
             >
               <div style={{
                 position: 'relative',
                 overflow: 'hidden',
-                paddingBottom: '75%', // 4:3 aspect ratio
               }}>
                 <img 
-                  src={photo.url} 
-                  alt={photo.alt || 'Photography'} 
+                  src={photo.thumbnailUrl || photo.url} 
+                  alt={photo.alt || 'Automotive photography'} 
+                  loading={index < 6 ? 'eager' : 'lazy'}
+                  fetchPriority={index < 3 ? 'high' : 'auto'}
+                  decoding="async"
+                  width={photo.width || undefined}
+                  height={photo.height || undefined}
                   style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
                     width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    transition: 'all 0.5s ease',
+                    height: 'auto',
+                    display: 'block',
+                    objectFit: 'contain',
+                    background: 'var(--color-subtle)',
                   }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'scale(1.05)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'scale(1)';
+                  onError={() => {
+                    setFailedIds((prev) => {
+                      const next = new Set(prev);
+                      next.add(photo.id);
+                      return next;
+                    });
                   }}
                 />
                 <div style={{
@@ -287,7 +289,7 @@ const Gallery = () => {
               ×
             </button>
             <img 
-              src={selectedPhoto.url} 
+              src={selectedPhoto.fullUrl || selectedPhoto.url} 
               alt={selectedPhoto.alt || 'Photography'}
               style={{
                 width: '100%',

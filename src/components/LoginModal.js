@@ -16,7 +16,9 @@ const LoginModal = ({ onClose, onLogin }) => {
       }
     };
     checkAuth();
-  }, [onLogin]);
+    // Only on mount — onLogin is stable from App.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

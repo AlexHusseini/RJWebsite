@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getSettings } from '../firebase/db';
+import { isUsableImageUrl } from '../utils/imageUrls';
 
 const About = () => {
   const [profilePhoto, setProfilePhoto] = useState(null);
@@ -9,7 +10,7 @@ const About = () => {
     const fetchSettings = async () => {
       try {
         const settingsData = await getSettings();
-        if (settingsData && settingsData.profilePhoto) {
+        if (settingsData && isUsableImageUrl(settingsData.profilePhoto)) {
           setProfilePhoto(settingsData.profilePhoto);
         }
       } catch (error) {

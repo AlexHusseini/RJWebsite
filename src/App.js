@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
 import Header from './components/Header';
 import Navigation from './components/Navigation';
@@ -10,36 +10,25 @@ import Footer from './components/Footer';
 import LoginModal from './components/LoginModal';
 import { checkSession } from './auth/authUtils';
 import { getSettings } from './firebase/db';
+import { isUsableImageUrl } from './utils/imageUrls';
 
 function App() {
-  console.log('App component rendering');
-  
-  // State management
   const [activeTab, setActiveTab] = useState('home');
   const [isAdmin, setIsAdmin] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
   
   useEffect(() => {
-    // Set the viewport height initially and on resize
     const setVH = () => {
-      // First we get the viewport height and multiply it by 1% to get a value for a vh unit
-      let vh = window.innerHeight * 0.01;
-      // Then we set the value in the --vh custom property to the root of the document
+      const vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty('--vh', `${vh}px`);
-      setViewportHeight(window.innerHeight);
     };
     
-    // Set the height initially
     setVH();
-    
-    // Add event listener
     window.addEventListener('resize', setVH);
     window.addEventListener('orientationchange', setVH);
     
-    // Cleanup
     return () => {
       window.removeEventListener('resize', setVH);
       window.removeEventListener('orientationchange', setVH);
@@ -64,14 +53,10 @@ function App() {
 
   // Check for existing session on load
   useEffect(() => {
-    console.log('App useEffect running');
     const checkAdminAuth = async () => {
-      console.log('Checking admin auth');
       const isAuthenticated = await checkSession();
-      console.log('Auth status:', isAuthenticated);
       setIsAdmin(isAuthenticated);
       
-      // If the user has a valid session and tries to access the admin panel
       if (isAuthenticated && window.location.hash === '#admin') {
         setActiveTab('admin');
       }
@@ -80,20 +65,31 @@ function App() {
     checkAdminAuth();
   }, []);
 
-  // Handle logout from admin panel
-  const handleLogout = () => {
-    console.log('Logging out');
+  // Open admin from the quiet footer link (#admin)
+  useEffect(() => {
+    const applyHash = () => {
+      if (window.location.hash !== '#admin') return;
+      if (isAdmin) {
+        setActiveTab((tab) => (tab === 'admin' ? tab : 'admin'));
+      } else {
+        setShowLoginModal(true);
+      }
+    };
+    applyHash();
+    window.addEventListener('hashchange', applyHash);
+    return () => window.removeEventListener('hashchange', applyHash);
+  }, [isAdmin]);
+
+  const handleLogout = useCallback(() => {
     setActiveTab('home');
     setIsAdmin(false);
-    // Update URL to remove any potential #admin hash
     if (window.location.hash) {
       window.history.pushState("", document.title, window.location.pathname);
     }
-  };
+  }, []);
 
   // Render content based on active tab
   const renderContent = () => {
-    console.log('Rendering content for tab:', activeTab);
     switch (activeTab) {
       case 'home':
         return (
@@ -159,7 +155,7 @@ function App() {
                 marginBottom: '60px'
               }}>
                 {!loading && settings && settings.homepagePhotos && 
-                 settings.homepagePhotos.map((img, index) => (
+                 settings.homepagePhotos.filter(isUsableImageUrl).map((img, index) => (
                   <div key={index} className="featured-image-item" style={{
                     borderRadius: '12px',
                     overflow: 'hidden',
@@ -174,7 +170,9 @@ function App() {
                   }}>
                     <img 
                       src={img} 
-                      alt="Featured photography" 
+                      alt="" 
+                      loading={index === 0 ? 'eager' : 'lazy'}
+                      decoding="async"
                       style={{
                         position: 'absolute',
                         top: '0',
@@ -241,13 +239,14 @@ function App() {
   };
 
   // Handle successful login
-  const handleLogin = () => {
+  const handleLogin = useCallback(() => {
     setShowLoginModal(false);
     setIsAdmin(true);
     setActiveTab('admin');
-    // Update URL with a hash to allow for bookmarking/sharing the admin panel
-    window.location.hash = 'admin';
-  };
+    if (window.location.hash !== '#admin') {
+      window.location.hash = 'admin';
+    }
+  }, []);
 
   // Helper function for smooth scrolling
   const handleTabClick = (tabId) => {
@@ -322,37 +321,15 @@ function App() {
           {renderContent()}
         </main>
         
-        {/* Admin Link */}
-        {activeTab !== 'admin' && (
-          <div style={{ 
-            textAlign: 'center', 
-            margin: '40px 0 0',
-            opacity: 0.5,
-            fontSize: '0.85rem' 
-          }}>
-            <button 
-              onClick={() => setShowLoginModal(true)} 
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                textDecoration: 'underline',
-                fontSize: '0.85rem',
-                color: 'var(--color-text)',
-                opacity: 0.7,
-                transition: 'opacity 0.3s ease',
-                padding: '8px'
-              }}
-            >
-              Site Admin
-            </button>
-          </div>
-        )}
-        
         {/* Login Modal */}
         {showLoginModal && (
           <LoginModal 
-            onClose={() => setShowLoginModal(false)} 
+            onClose={() => {
+              setShowLoginModal(false);
+              if (window.location.hash === '#admin') {
+                window.history.pushState('', document.title, window.location.pathname);
+              }
+            }} 
             onLogin={handleLogin}
           />
         )}

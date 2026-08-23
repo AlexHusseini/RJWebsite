@@ -5,13 +5,12 @@ const firebaseConfig = {
   apiKey: "AIzaSyD2jiJGAjSQAjxMXTf8Px4rdIR-tn0xeAc",
   authDomain: "photography-website-ad90f.firebaseapp.com",
   projectId: "photography-website-ad90f",
-  storageBucket: "photography-website-ad90f.appspot.com",
-  messagingSenderId: "1234567890",
-  appId: "1:1234567890:web:abcdef1234567890",
-  databaseURL: "https://photography-website-ad90f-default-rtdb.firebaseio.com"
+  storageBucket: "photography-website-ad90f.firebasestorage.app",
+  messagingSenderId: "121884957179",
+  appId: "1:121884957179:web:05ad3f527000724919135e",
+  measurementId: "G-977N9PRR2R"
 };
 
-// Initialize Firebase only if it hasn't been initialized already
 let app;
 if (!getApps().length) {
   app = initializeApp(firebaseConfig);
@@ -19,7 +18,6 @@ if (!getApps().length) {
   app = getApps()[0];
 }
 
-// Initialize Firestore
 export const db = getFirestore(app);
 
-export default app; 
+export default app;

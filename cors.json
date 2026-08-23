@@ -1,0 +1,23 @@
+[
+  {
+    "origin": [
+      "https://www.rsphotographies.com",
+      "https://rsphotographies.com",
+      "https://photography-website-ad90f.web.app",
+      "https://photography-website-ad90f.firebaseapp.com",
+      "http://localhost:3000"
+    ],
+    "method": ["GET", "HEAD", "PUT", "POST", "DELETE", "OPTIONS"],
+    "responseHeader": [
+      "Content-Type",
+      "Authorization",
+      "Content-Length",
+      "x-goog-resumable",
+      "x-goog-upload-protocol",
+      "x-goog-upload-command",
+      "x-goog-upload-header-content-length",
+      "x-goog-upload-header-content-type"
+    ],
+    "maxAgeSeconds": 3600
+  }
+]

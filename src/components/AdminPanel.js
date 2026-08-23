@@ -10,9 +10,13 @@ import {
   updatePhotoSection,
   getSettings,
   updateHomepagePhotos,
-  updateProfilePhoto
+  updateProfilePhoto,
+  updateSettings
 } from '../firebase/db';
-import { uploadPhoto, deletePhoto } from '../firebase/storage';
+import { deletePhoto } from '../firebase/storage';
+import PhotoUpload from './PhotoUpload';
+import { isUsableImageUrl } from '../utils/imageUrls';
+import { DEFAULT_CLOUD_NAME, DEFAULT_UPLOAD_PRESET } from '../utils/cloudinary';
 
 const AdminPanel = ({ onLogout }) => {
   const [photos, setPhotos] = useState([]);
@@ -36,6 +40,9 @@ const AdminPanel = ({ onLogout }) => {
   const [settings, setSettings] = useState(null);
   const [selectedHomepagePhotos, setSelectedHomepagePhotos] = useState([null, null, null]);
   const [selectedProfilePhoto, setSelectedProfilePhoto] = useState(null);
+  const [cloudinaryCloudName, setCloudinaryCloudName] = useState(DEFAULT_CLOUD_NAME);
+  const [cloudinaryUploadPreset, setCloudinaryUploadPreset] = useState(DEFAULT_UPLOAD_PRESET);
+  const [cloudinarySaving, setCloudinarySaving] = useState(false);
 
   // Load photos, sections, and settings on component mount
   useEffect(() => {
@@ -80,14 +87,27 @@ const AdminPanel = ({ onLogout }) => {
         setPhotos(loadedPhotos);
         setSections(loadedSections);
         setSettings(loadedSettings);
+        setNewPhoto((prev) => {
+          if (prev.section) return prev;
+          const preferred = loadedSections.find((s) => s.id !== 'uncategorized') || loadedSections[0];
+          return preferred ? { ...prev, section: preferred.id } : prev;
+        });
         
         // Initialize selected photos from settings
         if (loadedSettings) {
           if (loadedSettings.homepagePhotos) {
-            setSelectedHomepagePhotos(loadedSettings.homepagePhotos);
+            setSelectedHomepagePhotos(
+              loadedSettings.homepagePhotos.map((url) => (isUsableImageUrl(url) ? url : null))
+            );
           }
-          if (loadedSettings.profilePhoto) {
+          if (isUsableImageUrl(loadedSettings.profilePhoto)) {
             setSelectedProfilePhoto(loadedSettings.profilePhoto);
+          }
+          if (loadedSettings.cloudinaryCloudName) {
+            setCloudinaryCloudName(loadedSettings.cloudinaryCloudName);
+          }
+          if (loadedSettings.cloudinaryUploadPreset) {
+            setCloudinaryUploadPreset(loadedSettings.cloudinaryUploadPreset);
           }
         }
         
@@ -200,12 +220,12 @@ const AdminPanel = ({ onLogout }) => {
       }
       const addedSection = await addSection({ id: newSection.id, label: newSection.label });
       setSections(prevSections => [...prevSections, addedSection]);
-      // Reset form
+      setNewPhoto((prev) => ({ ...prev, section: addedSection.id }));
       setNewSection({
         id: '',
         label: ''
       });
-      setShowSuccess('Section added successfully!');
+      setShowSuccess('Column added — drop photos into it below.');
     } catch (error) {
       console.error('Error adding section:', error);
       setShowSuccess('Error adding section. Please try again.');
@@ -217,16 +237,24 @@ const AdminPanel = ({ onLogout }) => {
     }
   };
 
-  const handleDeletePhoto = async (photoId, photoURL) => {
+  const handleDeletePhoto = async (photoId, photoURL, extraUrls = {}) => {
     if (!window.confirm('Are you sure you want to delete this photo?')) {
       return;
     }
 
     setIsLoading(true);
     try {
-      // Only try to delete from storage if the URL is a Firebase Storage URL
-      if (photoURL && photoURL.includes('firebasestorage.googleapis.com')) {
-        await deletePhoto(photoURL);
+      // Delete full + thumbnail from Storage when they are Firebase URLs
+      const storageUrls = [photoURL, extraUrls.thumbnailUrl, extraUrls.fullUrl]
+        .filter((url, index, list) => url && list.indexOf(url) === index);
+      for (const url of storageUrls) {
+        if (url.includes('firebasestorage.googleapis.com')) {
+          try {
+            await deletePhoto(url);
+          } catch (storageError) {
+            console.error('Error deleting storage file:', storageError);
+          }
+        }
       }
       // Always delete from Firestore
       await deletePhotoFromDb(photoId);
@@ -348,6 +376,24 @@ const AdminPanel = ({ onLogout }) => {
   };
 
   // Save homepage photos to settings
+  const handleSaveCloudinary = async () => {
+    try {
+      setCloudinarySaving(true);
+      setError(null);
+      await updateSettings({
+        cloudinaryCloudName: cloudinaryCloudName.trim(),
+        cloudinaryUploadPreset: cloudinaryUploadPreset.trim(),
+      });
+      setShowSuccess('Cloudinary settings saved. You can drop photos now.');
+    } catch (error) {
+      console.error('Error saving Cloudinary settings:', error);
+      setError('Failed to save Cloudinary settings. Please try again.');
+    } finally {
+      setCloudinarySaving(false);
+      setTimeout(() => setShowSuccess(''), 3000);
+    }
+  };
+
   const handleSaveHomepagePhotos = async () => {
     try {
       setIsLoading(true);
@@ -488,6 +534,48 @@ const AdminPanel = ({ onLogout }) => {
           fontFamily: 'var(--font-heading)',
           color: 'var(--color-accent)'
         }}>Website Settings</h3>
+
+        <div style={{ marginBottom: '30px' }}>
+          <h4 style={{
+            fontSize: '1.1rem',
+            marginBottom: '8px',
+            color: 'var(--color-text)'
+          }}>Cloudinary (photo uploads)</h4>
+          <p style={{ fontSize: '0.85rem', opacity: 0.75, marginBottom: '12px' }}>
+            Free image hosting. Use an <strong>unsigned</strong> upload preset — never paste the API secret here.
+          </p>
+          <input
+            type="text"
+            value={cloudinaryCloudName}
+            onChange={(e) => setCloudinaryCloudName(e.target.value)}
+            placeholder="Cloud name (from the Cloudinary dashboard)"
+            style={{
+              width: '100%',
+              padding: '12px 15px',
+              borderRadius: '5px',
+              border: '1px solid var(--color-subtle)',
+              fontSize: '1rem',
+              marginBottom: '10px'
+            }}
+          />
+          <input
+            type="text"
+            value={cloudinaryUploadPreset}
+            onChange={(e) => setCloudinaryUploadPreset(e.target.value)}
+            placeholder="Unsigned upload preset name"
+            style={{
+              width: '100%',
+              padding: '12px 15px',
+              borderRadius: '5px',
+              border: '1px solid var(--color-subtle)',
+              fontSize: '1rem',
+              marginBottom: '12px'
+            }}
+          />
+          <button type="button" onClick={handleSaveCloudinary} disabled={cloudinarySaving}>
+            {cloudinarySaving ? 'SAVING…' : 'SAVE CLOUDINARY'}
+          </button>
+        </div>
 
         {/* Homepage Photos */}
         <div style={{ marginBottom: '30px' }}>
@@ -677,10 +765,13 @@ const AdminPanel = ({ onLogout }) => {
       }}>
         <h3 style={{
           fontSize: '1.4rem',
-          marginBottom: '20px',
+          marginBottom: '8px',
           fontFamily: 'var(--font-heading)',
           color: 'var(--color-accent)'
-        }}>Manage Sections</h3>
+        }}>Gallery columns</h3>
+        <p style={{ fontSize: '0.9rem', opacity: 0.75, marginBottom: '20px' }}>
+          These are the filters on the portfolio page (Ferrari Dealership, Fuel Fest, and so on).
+        </p>
 
         <div style={{
           display: 'grid',
@@ -703,7 +794,7 @@ const AdminPanel = ({ onLogout }) => {
                     opacity: 0.8
                   }}
                 >
-                  Section Name
+                  Column name
                 </label>
                 <input
                   type="text"
@@ -712,6 +803,7 @@ const AdminPanel = ({ onLogout }) => {
                   value={newSection.label}
                   onChange={handleSectionInputChange}
                   required
+                  placeholder="e.g. Porsche Meet"
                   style={{
                     width: '100%',
                     padding: '12px 15px',
@@ -739,7 +831,7 @@ const AdminPanel = ({ onLogout }) => {
                   width: '100%'
                 }}
               >
-                ADD SECTION
+                ADD COLUMN
               </button>
             </form>
           </div>
@@ -814,164 +906,131 @@ const AdminPanel = ({ onLogout }) => {
         }}>
           <h3 style={{
             fontSize: '1.4rem',
-            marginBottom: '20px',
+            marginBottom: '8px',
             fontFamily: 'var(--font-heading)',
             color: 'var(--color-accent)'
-          }}>Add New Photo</h3>
-          
-          <form onSubmit={handleAddPhoto}>
-            <div style={{ marginBottom: '20px' }}>
-              <label
-                htmlFor="title"
-                style={{
-                  display: 'block',
-                  marginBottom: '8px',
-                  fontSize: '0.9rem',
-                  opacity: 0.8
-                }}
-              >
-                Photo Title
-              </label>
-              <input
-                type="text"
-                id="title"
-                name="title"
-                value={newPhoto.title}
-                onChange={handleInputChange}
-                required
-                style={{
-                  width: '100%',
-                  padding: '12px 15px',
-                  borderRadius: '5px',
-                  border: '1px solid var(--color-subtle)',
-                  fontSize: '1rem',
-                  outline: 'none',
-                }}
-              />
-            </div>
-            
-            <div style={{ marginBottom: '20px' }}>
-              <label
-                htmlFor="section"
-                style={{
-                  display: 'block',
-                  marginBottom: '8px',
-                  fontSize: '0.9rem',
-                  opacity: 0.8
-                }}
-              >
-                Category
-              </label>
-              <select
-                id="section"
-                name="section"
-                value={newPhoto.section}
-                onChange={handleInputChange}
-                required
-                style={{
-                  width: '100%',
-                  padding: '12px 15px',
-                  borderRadius: '5px',
-                  border: '1px solid var(--color-subtle)',
-                  fontSize: '1rem',
-                  outline: 'none',
-                  backgroundColor: 'white'
-                }}
-              >
-                <option value="">Select a category</option>
-                {sections.map(section => (
-                  <option key={section.id} value={section.id}>
-                    {section.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            
-            <div style={{ marginBottom: '20px' }}>
-              <label
-                htmlFor="alt"
-                style={{
-                  display: 'block',
-                  marginBottom: '8px',
-                  fontSize: '0.9rem',
-                  opacity: 0.8
-                }}
-              >
-                Photo Description
-              </label>
-              <input
-                type="text"
-                id="alt"
-                name="alt"
-                value={newPhoto.alt}
-                onChange={handleInputChange}
-                required
-                style={{
-                  width: '100%',
-                  padding: '12px 15px',
-                  borderRadius: '5px',
-                  border: '1px solid var(--color-subtle)',
-                  fontSize: '1rem',
-                  outline: 'none',
-                }}
-              />
-            </div>
-            
-            <div style={{ marginBottom: '25px' }}>
-              <label
-                htmlFor="url"
-                style={{
-                  display: 'block',
-                  marginBottom: '8px',
-                  fontSize: '0.9rem',
-                  opacity: 0.8
-                }}
-              >
-                Image URL
-              </label>
-              <input
-                type="text"
-                id="url"
-                name="url"
-                value={newPhoto.url}
-                onChange={handleInputChange}
-                required
-                style={{
-                  width: '100%',
-                  padding: '12px 15px',
-                  borderRadius: '5px',
-                  border: '1px solid var(--color-subtle)',
-                  fontSize: '1rem',
-                  outline: 'none',
-                }}
-                placeholder="Paste a direct image URL (e.g. from Imgur, Cloudinary, etc.)"
-              />
-              {newPhoto.url && (
-                <div style={{ marginTop: '10px' }}>
-                  <img src={newPhoto.url} alt="Preview" style={{ maxWidth: '100%', maxHeight: '200px' }} />
-                </div>
-              )}
-            </div>
-            
-            <button
-              type="submit"
+          }}>Upload photos</h3>
+          <p style={{ fontSize: '0.9rem', opacity: 0.75, marginBottom: '16px' }}>
+            Pick a column, then drag in JPGs, PNGs, or a whole folder. No image links needed.
+          </p>
+
+          <div style={{ marginBottom: '24px' }}>
+            <label
+              htmlFor="uploadSection"
               style={{
-                background: 'var(--color-accent)',
-                color: 'white',
-                border: 'none',
-                padding: '12px 25px',
-                borderRadius: '5px',
-                fontSize: '0.95rem',
-                fontWeight: '500',
-                cursor: 'pointer',
-                transition: 'background-color 0.3s ease',
-                letterSpacing: '1px',
-                width: '100%'
+                display: 'block',
+                marginBottom: '8px',
+                fontSize: '0.9rem',
+                opacity: 0.8
               }}
             >
-              ADD PHOTO
-            </button>
-          </form>
+              Column
+            </label>
+            <select
+              id="uploadSection"
+              name="section"
+              value={newPhoto.section}
+              onChange={handleInputChange}
+              style={{
+                width: '100%',
+                padding: '12px 15px',
+                borderRadius: '5px',
+                border: '1px solid var(--color-subtle)',
+                fontSize: '1rem',
+                outline: 'none',
+                backgroundColor: 'white',
+                marginBottom: '12px'
+              }}
+            >
+              <option value="">Select a column</option>
+              {sections.map(section => (
+                <option key={section.id} value={section.id}>
+                  {section.label}
+                </option>
+              ))}
+            </select>
+            {newPhoto.section ? (
+              <PhotoUpload
+                section={newPhoto.section}
+                cloudName={cloudinaryCloudName}
+                uploadPreset={cloudinaryUploadPreset}
+                onUploadComplete={async () => {
+                  const updatedPhotos = await getPhotos();
+                  setPhotos(updatedPhotos);
+                  setShowSuccess('Photo(s) uploaded!');
+                  setTimeout(() => setShowSuccess(''), 3000);
+                }}
+              />
+            ) : (
+              <p style={{ fontSize: '0.85rem', opacity: 0.7, margin: 0 }}>
+                Add a column above, then drop photos here.
+              </p>
+            )}
+          </div>
+
+          <details style={{ marginTop: '8px' }}>
+            <summary style={{ cursor: 'pointer', fontSize: '0.85rem', opacity: 0.65 }}>
+              Or paste an image link
+            </summary>
+            <form onSubmit={handleAddPhoto} style={{ marginTop: '16px' }}>
+              <div style={{ marginBottom: '12px' }}>
+                <input
+                  type="text"
+                  id="title"
+                  name="title"
+                  value={newPhoto.title}
+                  onChange={handleInputChange}
+                  placeholder="Photo title"
+                  style={{
+                    width: '100%',
+                    padding: '12px 15px',
+                    borderRadius: '5px',
+                    border: '1px solid var(--color-subtle)',
+                    fontSize: '1rem',
+                    outline: 'none',
+                  }}
+                />
+              </div>
+              <div style={{ marginBottom: '12px' }}>
+                <input
+                  type="text"
+                  id="alt"
+                  name="alt"
+                  value={newPhoto.alt}
+                  onChange={handleInputChange}
+                  placeholder="Description"
+                  style={{
+                    width: '100%',
+                    padding: '12px 15px',
+                    borderRadius: '5px',
+                    border: '1px solid var(--color-subtle)',
+                    fontSize: '1rem',
+                    outline: 'none',
+                  }}
+                />
+              </div>
+              <div style={{ marginBottom: '16px' }}>
+                <input
+                  type="text"
+                  id="url"
+                  name="url"
+                  value={newPhoto.url}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="https://..."
+                  style={{
+                    width: '100%',
+                    padding: '12px 15px',
+                    borderRadius: '5px',
+                    border: '1px solid var(--color-subtle)',
+                    fontSize: '1rem',
+                    outline: 'none',
+                  }}
+                />
+              </div>
+              <button type="submit">ADD FROM LINK</button>
+            </form>
+          </details>
         </div>
         
         {/* Photo Management */}
@@ -1029,8 +1088,9 @@ const AdminPanel = ({ onLogout }) => {
                 boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
               }}>
                 <img 
-                  src={photo.url} 
+                  src={photo.thumbnailUrl || photo.url} 
                   alt={photo.alt}
+                  loading="lazy"
                   style={{
                     width: '100%',
                     height: '200px',
@@ -1093,7 +1153,10 @@ const AdminPanel = ({ onLogout }) => {
                       </div>
                       
                       <button
-                        onClick={() => handleDeletePhoto(photo.id, photo.url)}
+                        onClick={() => handleDeletePhoto(photo.id, photo.url, {
+                          thumbnailUrl: photo.thumbnailUrl,
+                          fullUrl: photo.fullUrl
+                        })}
                         style={{
                           background: 'rgba(255, 68, 68, 0.7)',
                           border: 'none',
