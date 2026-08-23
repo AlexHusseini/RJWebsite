@@ -1,27 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { getSettings } from '../firebase/db';
+import React from 'react';
 import { isUsableImageUrl } from '../utils/imageUrls';
 
-const Header = () => {
-  const [profilePhoto, setProfilePhoto] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const settingsData = await getSettings();
-        if (settingsData && isUsableImageUrl(settingsData.profilePhoto)) {
-          setProfilePhoto(settingsData.profilePhoto);
-        }
-      } catch (error) {
-        console.error("Error fetching profile photo:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchSettings();
-  }, []);
+const Header = ({ profilePhoto }) => {
+  const photo = isUsableImageUrl(profilePhoto) ? profilePhoto : null;
 
   return (
     <header style={{
@@ -51,10 +32,10 @@ const Header = () => {
           justifyContent: 'center',
           backgroundColor: 'var(--color-subtle)'
         }}>
-          {profilePhoto && (
+          {photo ? (
             <img
-              src={profilePhoto}
-              alt="Profile"
+              src={photo}
+              alt="RS Photography"
               className="profile-image"
               style={{
                 width: '100%',
@@ -63,21 +44,8 @@ const Header = () => {
                 objectPosition: 'center center'
               }}
             />
-          )}
-          {loading && (
-            <div style={{
-              position: 'absolute',
-              width: '100%', 
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: 'var(--color-subtle)',
-              color: 'var(--color-text)',
-              opacity: 0.7
-            }}>
-              Loading...
-            </div>
+          ) : (
+            <span className="profile-monogram">RS</span>
           )}
         </div>
 
@@ -135,4 +103,4 @@ const Header = () => {
   );
 };
 
-export default Header; 
+export default Header;

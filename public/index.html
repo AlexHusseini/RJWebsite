@@ -36,10 +36,8 @@
         overflow-x: hidden;
       }
       
-      body {
-        position: relative;
-        touch-action: manipulation;
-        -webkit-text-size-adjust: 100%;
+      body:not(.site-ready) {
+        overflow: hidden;
       }
       
       #root {
@@ -48,6 +46,64 @@
         overflow-x: hidden;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
+      }
+
+      #boot-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #ffffff;
+        color: #4E7C8A;
+        transition: opacity 0.7s ease, visibility 0.7s ease;
+      }
+
+      #boot-splash.is-leaving {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .boot-splash-inner {
+        text-align: center;
+        animation: bootFade 0.9s ease both;
+      }
+
+      .boot-splash-mark {
+        width: 88px;
+        height: 88px;
+        margin: 0 auto 18px;
+        border: 1px solid #4E7C8A;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: Georgia, 'Times New Roman', serif;
+        font-size: 28px;
+        letter-spacing: 2px;
+      }
+
+      .boot-splash-title {
+        margin: 0;
+        font-family: Georgia, 'Times New Roman', serif;
+        font-weight: 400;
+        font-size: 28px;
+        letter-spacing: 2px;
+      }
+
+      .boot-splash-line {
+        width: 56px;
+        height: 2px;
+        background: #4E7C8A;
+        margin: 16px auto 0;
+        opacity: 0.7;
+      }
+
+      @keyframes bootFade {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
       }
       
       @media screen and (max-width: 480px) {
@@ -59,6 +115,13 @@
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="boot-splash" aria-hidden="true">
+      <div class="boot-splash-inner">
+        <div class="boot-splash-mark">RS</div>
+        <h1 class="boot-splash-title">RS Photography</h1>
+        <div class="boot-splash-line"></div>
+      </div>
+    </div>
     <div id="root"></div>
     <!--
       This HTML file is a template.

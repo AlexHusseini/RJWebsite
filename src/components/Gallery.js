@@ -11,46 +11,35 @@ const Gallery = () => {
   const [error, setError] = useState('');
   const [failedIds, setFailedIds] = useState(() => new Set());
 
-  // Fetch sections from database
   useEffect(() => {
-    const loadSections = async () => {
+    let cancelled = false;
+
+    const loadGallery = async () => {
       try {
-        const loadedSections = await getSections();
+        const [loadedSections, loadedPhotos] = await Promise.all([
+          getSections(),
+          getPhotos(),
+        ]);
+        if (cancelled) return;
         const sortedSections = gallerySectionsOnly(loadedSections).sort((a, b) =>
           a.label.localeCompare(b.label)
         );
         setSections(sortedSections);
-      } catch (error) {
-        console.error('Error loading sections:', error);
-        setError('Failed to load gallery sections. Please try again later.');
-      }
-    };
-    
-    loadSections();
-  }, []);
-
-  useEffect(() => {
-    const loadPhotos = async () => {
-      try {
-        setLoading(true);
-        
-        // Fetch photos based on active section
-        const photosData = activeSection === 'all' ? await getPhotos() : await getPhotos(activeSection);
-        setPhotos(photosData);
-        setFailedIds(new Set());
+        setPhotos(loadedPhotos);
         setError('');
-      } catch (error) {
-        console.error('Error loading photos:', error);
-        setError('Failed to load photos. Please try again later.');
+      } catch (err) {
+        console.error('Error loading gallery:', err);
+        if (!cancelled) setError('Failed to load photos. Please try again later.');
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
-    if (sections.length > 0 || activeSection === 'all') {
-      loadPhotos();
-    }
-  }, [activeSection, sections.length]);
+    loadGallery();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Filter photos based on active section
   const filteredPhotos = activeSection === 'all' 
@@ -59,6 +48,7 @@ const Gallery = () => {
 
   const handleSectionChange = (sectionId) => {
     setSelectedPhoto(null);
+    setFailedIds(new Set());
     setActiveSection(sectionId);
   };
 
@@ -105,13 +95,9 @@ const Gallery = () => {
       )}
 
       {loading ? (
-        <div style={{
-          textAlign: 'center',
-          padding: '40px',
-          color: 'var(--color-text)',
-          fontSize: '1.1rem'
-        }}>
-          Loading photos...
+        <div className="gallery-veil" aria-hidden="true">
+          <div className="gallery-veil-mark">RS</div>
+          <div className="gallery-veil-line"></div>
         </div>
       ) : visiblePhotos.length === 0 ? (
         <div style={{
@@ -142,7 +128,7 @@ const Gallery = () => {
           </p>
         </div>
       ) : (
-        <div className="gallery-grid">
+        <div key={activeSection} className="gallery-grid gallery-grid--reveal">
           {visiblePhotos.map((photo, index) => (
             <div 
               key={photo.id} 
@@ -164,6 +150,7 @@ const Gallery = () => {
                 <img 
                   src={photo.thumbnailUrl || photo.url} 
                   alt={photo.alt || 'Automotive photography'} 
+                  className="gallery-photo"
                   loading={index < 6 ? 'eager' : 'lazy'}
                   fetchPriority={index < 3 ? 'high' : 'auto'}
                   decoding="async"
@@ -175,6 +162,12 @@ const Gallery = () => {
                     display: 'block',
                     objectFit: 'contain',
                     background: 'var(--color-subtle)',
+                  }}
+                  onLoad={(e) => e.currentTarget.classList.add('is-loaded')}
+                  ref={(img) => {
+                    if (img && img.complete && img.naturalWidth) {
+                      img.classList.add('is-loaded');
+                    }
                   }}
                   onError={() => {
                     setFailedIds((prev) => {

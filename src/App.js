@@ -10,14 +10,17 @@ import Footer from './components/Footer';
 import LoginModal from './components/LoginModal';
 import { checkSession } from './auth/authUtils';
 import { getSettings } from './firebase/db';
-import { isUsableImageUrl } from './utils/imageUrls';
+import { isUsableImageUrl, preloadImage } from './utils/imageUrls';
+
+const MIN_SPLASH_MS = 1100;
+const MAX_WAIT_MS = 6000;
 
 function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [isAdmin, setIsAdmin] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [settings, setSettings] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [ready, setReady] = useState(false);
   
   useEffect(() => {
     const setVH = () => {
@@ -35,21 +38,65 @@ function App() {
     };
   }, []);
   
-  // Fetch website settings
   useEffect(() => {
-    const fetchSettings = async () => {
+    let cancelled = false;
+    const started = Date.now();
+
+    const finish = async () => {
+      const wait = Math.max(0, MIN_SPLASH_MS - (Date.now() - started));
+      await new Promise((resolve) => setTimeout(resolve, wait));
+      if (!cancelled) setReady(true);
+    };
+
+    const boot = async () => {
       try {
-        const settingsData = await getSettings();
-        setSettings(settingsData);
+        const settingsData = await Promise.race([
+          getSettings(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), MAX_WAIT_MS)),
+        ]).catch(() => null);
+
+        if (settingsData) setSettings(settingsData);
+
+        const urls = [];
+        if (settingsData && isUsableImageUrl(settingsData.profilePhoto)) {
+          urls.push(settingsData.profilePhoto);
+        }
+        if (settingsData?.homepagePhotos) {
+          urls.push(...settingsData.homepagePhotos.filter(isUsableImageUrl).slice(0, 3));
+        }
+
+        if (urls.length) {
+          await Promise.race([
+            Promise.all(urls.map(preloadImage)),
+            new Promise((resolve) => setTimeout(resolve, MAX_WAIT_MS)),
+          ]);
+        }
       } catch (error) {
-        console.error("Error fetching settings:", error);
+        console.error('Error fetching settings:', error);
       } finally {
-        setLoading(false);
+        await finish();
       }
     };
-    
-    fetchSettings();
+
+    boot();
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  useEffect(() => {
+    if (!ready) return undefined;
+    const splash = document.getElementById('boot-splash');
+    document.body.classList.add('site-ready');
+    if (splash) {
+      splash.classList.add('is-leaving');
+      const timer = setTimeout(() => {
+        splash.remove();
+      }, 750);
+      return () => clearTimeout(timer);
+    }
+    return undefined;
+  }, [ready]);
 
   // Check for existing session on load
   useEffect(() => {
@@ -154,7 +201,7 @@ function App() {
                 gap: '20px',
                 marginBottom: '60px'
               }}>
-                {!loading && settings && settings.homepagePhotos && 
+                {settings && settings.homepagePhotos && 
                  settings.homepagePhotos.filter(isUsableImageUrl).map((img, index) => (
                   <div key={index} className="featured-image-item" style={{
                     borderRadius: '12px',
@@ -228,13 +275,13 @@ function App() {
       case 'portfolio':
         return <Gallery />;
       case 'about':
-        return <About />;
+        return <About profilePhoto={settings?.profilePhoto} />;
       case 'contact':
         return <Contact />;
       case 'admin':
         return isAdmin ? <AdminPanel onLogout={handleLogout} /> : <div>Not authorized</div>;
       default:
-        return <About />;
+        return <About profilePhoto={settings?.profilePhoto} />;
     }
   };
 
@@ -265,8 +312,10 @@ function App() {
   };
 
   return (
-    <div className="App" style={{ 
-      backgroundColor: 'var(--color-background)', 
+    <div
+      className={`App${ready ? ' is-ready' : ''}`}
+      style={{
+      backgroundColor: 'var(--color-background)',
       color: 'var(--color-text)',
       minHeight: '100vh',
       minHeight: 'calc(var(--vh, 1vh) * 100)',
@@ -278,7 +327,6 @@ function App() {
       overflowY: 'auto',
       WebkitOverflowScrolling: 'touch'
     }}>
-      {/* Background accent elements */}
       <div style={{
         position: 'absolute',
         top: '15%',
@@ -311,7 +359,7 @@ function App() {
         display: 'flex',
         flexDirection: 'column'
       }}>
-        <Header />
+        <Header profilePhoto={settings?.profilePhoto} />
         <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
         
         <main style={{

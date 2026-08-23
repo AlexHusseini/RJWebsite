@@ -1,27 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { getSettings } from '../firebase/db';
+import React from 'react';
 import { isUsableImageUrl } from '../utils/imageUrls';
 
-const About = () => {
-  const [profilePhoto, setProfilePhoto] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const settingsData = await getSettings();
-        if (settingsData && isUsableImageUrl(settingsData.profilePhoto)) {
-          setProfilePhoto(settingsData.profilePhoto);
-        }
-      } catch (error) {
-        console.error("Error fetching profile photo:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchSettings();
-  }, []);
+const About = ({ profilePhoto }) => {
+  const photo = isUsableImageUrl(profilePhoto) ? profilePhoto : null;
 
   return (
     <section id="about" className="fade-in" style={{
@@ -103,36 +84,20 @@ const About = () => {
               transform: 'rotateY(0deg) rotateX(0deg)'
             }
           }}>
-            {profilePhoto && (
+            {photo ? (
               <img 
-                src={profilePhoto} 
-                alt="Profile Photo" 
+                src={photo} 
+                alt="RS Shaheen" 
                 style={{
                   width: '100%',
                   height: 'auto',
                   aspectRatio: '1/1',
                   objectFit: 'cover',
                   transition: 'transform 0.7s cubic-bezier(0.22, 1, 0.36, 1)',
-                  '&:hover': {
-                    transform: 'scale(1.05)'
-                  }
                 }}
               />
-            )}
-            {loading && (
-              <div style={{
-                position: 'absolute',
-                width: '100%', 
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: 'var(--color-subtle)',
-                color: 'var(--color-text)',
-                opacity: 0.7
-              }}>
-                Loading...
-              </div>
+            ) : (
+              <div className="profile-monogram profile-monogram--large">RS</div>
             )}
             <div style={{
               position: 'absolute',
