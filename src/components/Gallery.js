@@ -206,7 +206,7 @@ const Gallery = () => {
                   e.currentTarget.style.opacity = 0;
                 }}>
                   <h3 style={{ fontSize: '1.1rem', marginBottom: '5px', fontWeight: 500 }}>{photo.title}</h3>
-                  <p style={{ fontSize: '0.9rem', margin: 0, opacity: 0.8 }}>{photo.alt}</p>
+                  <p style={{ fontSize: '0.9rem', margin: 0, opacity: 0.8 }}>{photo.description || photo.alt}</p>
                 </div>
               </div>
             </div>
@@ -299,31 +299,40 @@ const Gallery = () => {
                 display: 'block'
               }}
             />
+            {(selectedPhoto.title || selectedPhoto.description || selectedPhoto.alt || !isUnassignedSection(selectedPhoto.section)) && (
             <div style={{
               background: 'white',
               padding: '20px',
               textAlign: 'left'
             }}>
-              <h3 style={{ 
-                margin: '0 0 10px 0', 
-                color: 'var(--color-accent)',
-                fontFamily: 'var(--font-heading)',
-                fontSize: '1.5rem' 
-              }}>
-                {selectedPhoto.title}
-              </h3>
-              <p style={{ margin: 0, fontWeight: 300, fontSize: '1rem' }}>{selectedPhoto.alt}</p>
-              <div style={{ 
-                fontSize: '0.9rem', 
-                color: 'var(--color-text)', 
-                opacity: 0.7,
-                marginTop: '10px',
-                fontStyle: 'italic',
-                textTransform: 'capitalize'
-              }}>
-                {selectedPhoto.section} Photography
-              </div>
+              {selectedPhoto.title ? (
+                <h3 style={{ 
+                  margin: '0 0 10px 0', 
+                  color: 'var(--color-accent)',
+                  fontFamily: 'var(--font-heading)',
+                  fontSize: '1.5rem' 
+                }}>
+                  {selectedPhoto.title}
+                </h3>
+              ) : null}
+              {(selectedPhoto.description || selectedPhoto.alt) ? (
+                <p style={{ margin: 0, fontWeight: 300, fontSize: '1rem' }}>
+                  {selectedPhoto.description || selectedPhoto.alt}
+                </p>
+              ) : null}
+              {!isUnassignedSection(selectedPhoto.section) && (
+                <div style={{ 
+                  fontSize: '0.9rem', 
+                  color: 'var(--color-text)', 
+                  opacity: 0.7,
+                  marginTop: selectedPhoto.title || selectedPhoto.description || selectedPhoto.alt ? '10px' : 0,
+                  fontStyle: 'italic'
+                }}>
+                  {sections.find((section) => section.id === selectedPhoto.section)?.label || selectedPhoto.section}
+                </div>
+              )}
             </div>
+            )}
           </div>
         </div>
       )}

@@ -8,6 +8,7 @@ import {
   addSection,
   deleteSection,
   updatePhotoSection,
+  updatePhoto,
   getSettings,
   updateHomepagePhotos,
   updateProfilePhoto,
@@ -39,6 +40,9 @@ const AdminPanel = ({ onLogout }) => {
   const [selectedHomepagePhotos, setSelectedHomepagePhotos] = useState([null, null, null]);
   const [selectedProfilePhoto, setSelectedProfilePhoto] = useState(null);
   const [pickingFor, setPickingFor] = useState(null);
+  const [editingPhoto, setEditingPhoto] = useState(null);
+  const [editDraft, setEditDraft] = useState({ title: '', description: '', section: '' });
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const flash = (message, isError = false) => {
     if (isError) {
@@ -89,13 +93,17 @@ const AdminPanel = ({ onLogout }) => {
   }, []);
 
   useEffect(() => {
-    if (!pickingFor) return undefined;
     const onKey = (e) => {
-      if (e.key === 'Escape') setPickingFor(null);
+      if (e.key !== 'Escape') return;
+      if (editingPhoto) {
+        setEditingPhoto(null);
+        return;
+      }
+      if (pickingFor) setPickingFor(null);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [pickingFor]);
+  }, [pickingFor, editingPhoto]);
 
   const unassignedPhotos = photos.filter((photo) => isUnassignedSection(photo.section));
   const filteredPhotos =
@@ -227,21 +235,6 @@ const AdminPanel = ({ onLogout }) => {
     }
   };
 
-  const handleMovePhoto = async (photoId, newSectionId) => {
-    try {
-      await updatePhotoSection(photoId, newSectionId);
-      setPhotos((prev) =>
-        prev.map((photo) =>
-          photo.id === photoId ? { ...photo, section: newSectionId || UNASSIGNED_SECTION } : photo
-        )
-      );
-      flash(`Moved to ${sectionLabel(newSectionId)}.`);
-    } catch (err) {
-      console.error('Error moving photo:', err);
-      flash(err.message || 'Failed to move photo.', true);
-    }
-  };
-
   const togglePicking = (target) => {
     setPickingFor((prev) => (prev === target ? null : target));
   };
@@ -266,6 +259,49 @@ const AdminPanel = ({ onLogout }) => {
     } catch (err) {
       console.error('Error updating featured photo:', err);
       flash('Could not update that photo. Please try again.', true);
+    }
+  };
+
+  const openEditor = (photo) => {
+    setPickingFor(null);
+    setEditingPhoto(photo);
+    setEditDraft({
+      title: photo.title || '',
+      description: photo.description || photo.alt || '',
+      section: isUnassignedSection(photo.section) ? '' : photo.section,
+    });
+  };
+
+  const handlePhotoClick = (photo) => {
+    if (pickingFor) {
+      applyPickedPhoto(photo);
+      return;
+    }
+    openEditor(photo);
+  };
+
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
+    if (!editingPhoto) return;
+    setSavingEdit(true);
+    try {
+      const patch = await updatePhoto(editingPhoto.id, {
+        title: editDraft.title,
+        description: editDraft.description,
+        section: editDraft.section,
+      });
+      setPhotos((prev) =>
+        prev.map((photo) =>
+          photo.id === editingPhoto.id ? { ...photo, ...patch } : photo
+        )
+      );
+      setEditingPhoto(null);
+      flash('Photo details saved.');
+    } catch (err) {
+      console.error('Error saving photo details:', err);
+      flash(err.message || 'Could not save photo details.', true);
+    } finally {
+      setSavingEdit(false);
     }
   };
 
@@ -439,7 +475,7 @@ const AdminPanel = ({ onLogout }) => {
       <div className="admin-card">
         <h3>Photos</h3>
         <p className="admin-help">
-          Unassigned photos stay here only — they do not show on the public gallery until you pick a column.
+          Click a photo to edit its title and description. Unassigned photos stay here only — they do not show on the public gallery until you pick a column.
         </p>
         <div className="admin-filters">
           <button
@@ -486,20 +522,15 @@ const AdminPanel = ({ onLogout }) => {
                     src={photoThumb(photo)}
                     alt=""
                     loading="lazy"
-                    onClick={() => applyPickedPhoto(photo)}
+                    onClick={() => handlePhotoClick(photo)}
                   />
                   <div className="admin-photo-bar" onClick={(e) => e.stopPropagation()}>
-                    <select
-                      value={unassigned ? '' : photo.section}
-                      onChange={(e) => handleMovePhoto(photo.id, e.target.value)}
-                    >
-                      <option value="">Unassigned</option>
-                      {sections.map((section) => (
-                        <option key={section.id} value={section.id}>
-                          {section.label}
-                        </option>
-                      ))}
-                    </select>
+                    <span className="admin-photo-col">
+                      {unassigned ? 'Unassigned' : sectionLabel(photo.section)}
+                    </span>
+                    <button type="button" className="admin-photo-edit" onClick={() => openEditor(photo)}>
+                      Edit
+                    </button>
                     <button
                       type="button"
                       className="admin-photo-delete"
@@ -519,6 +550,60 @@ const AdminPanel = ({ onLogout }) => {
           </div>
         )}
       </div>
+
+      {editingPhoto && (
+        <div className="admin-modal-backdrop" onClick={() => setEditingPhoto(null)}>
+          <form
+            className="admin-modal"
+            onClick={(e) => e.stopPropagation()}
+            onSubmit={handleSaveEdit}
+          >
+            <h3>Edit photo</h3>
+            <p className="admin-help">Title, description, and column. Title and description show when someone clicks the photo on the site.</p>
+            <img className="admin-modal-preview" src={photoThumb(editingPhoto)} alt="" />
+            <label className="admin-field" htmlFor="editSection">Column</label>
+            <select
+              id="editSection"
+              className="admin-select"
+              value={editDraft.section}
+              onChange={(e) => setEditDraft((prev) => ({ ...prev, section: e.target.value }))}
+            >
+              <option value="">Unassigned — sort later</option>
+              {sections.map((section) => (
+                <option key={section.id} value={section.id}>
+                  {section.label}
+                </option>
+              ))}
+            </select>
+            <label className="admin-field" htmlFor="editTitle">Title</label>
+            <input
+              id="editTitle"
+              className="admin-input"
+              type="text"
+              value={editDraft.title}
+              onChange={(e) => setEditDraft((prev) => ({ ...prev, title: e.target.value }))}
+              placeholder="Photo title"
+            />
+            <label className="admin-field" htmlFor="editDescription">Description</label>
+            <textarea
+              id="editDescription"
+              className="admin-textarea"
+              rows={4}
+              value={editDraft.description}
+              onChange={(e) => setEditDraft((prev) => ({ ...prev, description: e.target.value }))}
+              placeholder="What should people read when they open this photo?"
+            />
+            <div className="admin-modal-actions">
+              <button type="button" className="admin-chip" onClick={() => setEditingPhoto(null)}>
+                Cancel
+              </button>
+              <button type="submit" disabled={savingEdit}>
+                {savingEdit ? 'SAVING…' : 'SAVE'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </section>
   );
 };

@@ -226,6 +226,46 @@ export const getSections = async () => {
   }
 };
 
+export const updatePhoto = async (photoId, fields) => {
+  try {
+    checkOperationLimit('write');
+
+    const patch = {
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (fields.title !== undefined) patch.title = fields.title.trim();
+    if (fields.description !== undefined) {
+      patch.description = fields.description.trim();
+      patch.alt = patch.description;
+    } else if (fields.alt !== undefined) {
+      patch.alt = fields.alt.trim();
+    }
+
+    if (fields.section !== undefined) {
+      const sectionId = isUnassignedSection(fields.section)
+        ? UNASSIGNED_SECTION
+        : fields.section;
+      if (sectionId !== UNASSIGNED_SECTION) {
+        const sectionsRef = collection(db, 'sections');
+        const sectionQuery = query(sectionsRef, where('id', '==', sectionId));
+        const sectionSnapshot = await getDocs(sectionQuery);
+        if (sectionSnapshot.empty) {
+          throw new Error(`Cannot update photo to non-existent section: ${sectionId}`);
+        }
+      }
+      patch.section = sectionId;
+    }
+
+    const photoRef = doc(db, 'photos', photoId);
+    await updateDoc(photoRef, patch);
+    return patch;
+  } catch (error) {
+    console.error('Error updating photo: ', error);
+    throw error;
+  }
+};
+
 export const updatePhotoSection = async (photoId, newSectionId) => {
   try {
     checkOperationLimit('write');
