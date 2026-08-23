@@ -18,14 +18,13 @@ const PHOTOS_KEY = 'portfolio_photos';
 const SECTIONS_KEY = 'portfolio_sections';
 const SETTINGS_KEY = 'website_settings';
 
-// Default sections
-const DEFAULT_SECTIONS = [
-  { id: 'uncategorized', label: 'Uncategorized' },
-  { id: 'landscape', label: 'Landscape' },
-  { id: 'portrait', label: 'Portrait' },
-  { id: 'street', label: 'Street' },
-  { id: 'architecture', label: 'Architecture' }
-];
+export const UNASSIGNED_SECTION = 'unassigned';
+
+export const isUnassignedSection = (sectionId) =>
+  !sectionId || sectionId === UNASSIGNED_SECTION || sectionId === 'uncategorized';
+
+export const gallerySectionsOnly = (sections = []) =>
+  sections.filter((section) => !isUnassignedSection(section.id));
 
 // Default settings
 const DEFAULT_SETTINGS = {
@@ -171,11 +170,6 @@ export const addSection = async (sectionData) => {
 
 export const deleteSection = async (sectionId) => {
   try {
-    // Don't allow deletion of the uncategorized section
-    if (sectionId === 'uncategorized') {
-      throw new Error("The 'uncategorized' section cannot be deleted");
-    }
-    
     checkOperationLimit('read'); // First we need to read to find the document
     
     // Find the document that has the field id equal to sectionId
@@ -235,24 +229,21 @@ export const getSections = async () => {
 export const updatePhotoSection = async (photoId, newSectionId) => {
   try {
     checkOperationLimit('write');
-    
-    // Validate the section exists before updating
-    const sectionsRef = collection(db, 'sections');
-    const sectionQuery = query(sectionsRef, where('id', '==', newSectionId));
-    const sectionSnapshot = await getDocs(sectionQuery);
-    
-    // If section doesn't exist and it's not "uncategorized", create it
-    if (sectionSnapshot.empty && newSectionId === 'uncategorized') {
-      console.log('Creating missing uncategorized section before updating photo');
-      await addSection({ id: 'uncategorized', label: 'Uncategorized' });
-    } else if (sectionSnapshot.empty) {
-      throw new Error(`Cannot update photo to non-existent section: ${newSectionId}`);
+
+    const sectionId = isUnassignedSection(newSectionId) ? UNASSIGNED_SECTION : newSectionId;
+
+    if (sectionId !== UNASSIGNED_SECTION) {
+      const sectionsRef = collection(db, 'sections');
+      const sectionQuery = query(sectionsRef, where('id', '==', sectionId));
+      const sectionSnapshot = await getDocs(sectionQuery);
+      if (sectionSnapshot.empty) {
+        throw new Error(`Cannot update photo to non-existent section: ${sectionId}`);
+      }
     }
-    
-    // Update the photo with the new section ID
+
     const photoRef = doc(db, 'photos', photoId);
-    await updateDoc(photoRef, { 
-      section: newSectionId,
+    await updateDoc(photoRef, {
+      section: sectionId,
       updatedAt: new Date().toISOString()
     });
     

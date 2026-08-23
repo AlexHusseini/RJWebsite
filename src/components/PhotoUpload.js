@@ -8,15 +8,10 @@ import {
   DEFAULT_CLOUD_NAME,
   DEFAULT_UPLOAD_PRESET,
 } from '../utils/cloudinary';
-import { addPhoto } from '../firebase/db';
+import { addPhoto, UNASSIGNED_SECTION } from '../firebase/db';
 import { processImage, formatBytes, isImageFile } from '../utils/imageUtils';
 
-const PhotoUpload = ({
-  section,
-  onUploadComplete,
-  cloudName = DEFAULT_CLOUD_NAME,
-  uploadPreset = DEFAULT_UPLOAD_PRESET,
-}) => {
+const PhotoUpload = ({ section, onUploadComplete }) => {
   const [queue, setQueue] = useState([]);      // [{ id, file, previewUrl, status, progress, error }]
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -89,14 +84,14 @@ const PhotoUpload = ({
     });
   };
 
-  const resolvedCloudName = cloudName || DEFAULT_CLOUD_NAME;
-  const resolvedPreset = uploadPreset || DEFAULT_UPLOAD_PRESET;
+  const resolvedCloudName = DEFAULT_CLOUD_NAME;
+  const resolvedPreset = DEFAULT_UPLOAD_PRESET;
 
   // ---- Upload -------------------------------------------------------------
 
   const uploadAll = async () => {
-    if (!section) return;
     if (!resolvedCloudName || !resolvedPreset) return;
+    const targetSection = section || UNASSIGNED_SECTION;
     setUploading(true);
 
     for (const item of queue.filter((i) => i.status === 'pending' || i.status === 'error')) {
@@ -137,7 +132,7 @@ const PhotoUpload = ({
           aspectRatio: processed.aspectRatio,
           title,
           alt: title,
-          section,
+          section: targetSection,
           uploadedAt: new Date().toISOString(),
         });
 
@@ -187,11 +182,6 @@ const PhotoUpload = ({
         <p style={{ margin: '0.5rem 0 0', fontSize: '0.85rem', color: '#777' }}>
           JPG, PNG, WebP, HEIC — drop a whole folder if you want. They compress automatically.
         </p>
-        {(!resolvedCloudName || !resolvedPreset) && (
-          <p style={{ margin: '0.75rem 0 0', fontSize: '0.85rem', color: '#a60' }}>
-            Save Cloudinary cloud name and unsigned preset in Website Settings first.
-          </p>
-        )}
         <input
           ref={inputRef}
           type="file"
@@ -295,7 +285,7 @@ const PhotoUpload = ({
           <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.25rem', alignItems: 'center' }}>
             <button
               onClick={uploadAll}
-              disabled={uploading || pendingCount === 0 || !section || !cloudName || !uploadPreset}
+              disabled={uploading || pendingCount === 0}
               className="upload-button"
               style={{ padding: '0.6rem 1.4rem', cursor: uploading ? 'wait' : 'pointer' }}
             >

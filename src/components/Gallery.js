@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import SectionSelector from './SectionSelector';
-import { getPhotos } from '../firebase/db';
-import { getSections } from '../firebase/db';
+import { getPhotos, getSections, gallerySectionsOnly, isUnassignedSection } from '../firebase/db';
 
 const Gallery = () => {
   const [photos, setPhotos] = useState([]);
@@ -17,12 +16,9 @@ const Gallery = () => {
     const loadSections = async () => {
       try {
         const loadedSections = await getSections();
-        // Sort sections (keeping 'uncategorized' at the end if it exists)
-        const sortedSections = loadedSections.sort((a, b) => {
-          if (a.id === 'uncategorized') return 1;
-          if (b.id === 'uncategorized') return -1;
-          return a.label.localeCompare(b.label);
-        });
+        const sortedSections = gallerySectionsOnly(loadedSections).sort((a, b) =>
+          a.label.localeCompare(b.label)
+        );
         setSections(sortedSections);
       } catch (error) {
         console.error('Error loading sections:', error);
@@ -68,6 +64,7 @@ const Gallery = () => {
 
   const visiblePhotos = filteredPhotos.filter((photo) => {
     if (failedIds.has(photo.id)) return false;
+    if (isUnassignedSection(photo.section)) return false;
     const src = photo.thumbnailUrl || photo.url || '';
     // Expired ImageKit hosts hang the browser; skip them.
     if (src.includes('media-hosting.imagekit.io')) return false;

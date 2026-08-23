@@ -3,7 +3,7 @@ export const DEFAULT_UPLOAD_PRESET = 'rs-photos';
 
 export async function uploadImageToCloudinary(file, { cloudName, uploadPreset }) {
   if (!cloudName || !uploadPreset) {
-    throw new Error('Cloudinary is not set up yet. Save the cloud name and unsigned preset in Website Settings.');
+    throw new Error('Photo upload is not configured.');
   }
 
   const form = new FormData();
