@@ -242,6 +242,13 @@ export const updatePhoto = async (photoId, fields) => {
       patch.alt = fields.alt.trim();
     }
 
+    if (fields.url !== undefined) patch.url = fields.url;
+    if (fields.thumbnailUrl !== undefined) patch.thumbnailUrl = fields.thumbnailUrl;
+    if (fields.fullUrl !== undefined) patch.fullUrl = fields.fullUrl;
+    if (fields.width !== undefined) patch.width = fields.width;
+    if (fields.height !== undefined) patch.height = fields.height;
+    if (fields.aspectRatio !== undefined) patch.aspectRatio = fields.aspectRatio;
+
     if (fields.section !== undefined) {
       const sectionId = isUnassignedSection(fields.section)
         ? UNASSIGNED_SECTION

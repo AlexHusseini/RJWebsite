@@ -18,7 +18,16 @@ import {
 } from '../firebase/db';
 import { deletePhoto } from '../firebase/storage';
 import PhotoUpload from './PhotoUpload';
+import PhotoCropper from './PhotoCropper';
 import { isUsableImageUrl } from '../utils/imageUrls';
+import {
+  uploadImageToCloudinary,
+  cloudinaryDeliveryUrl,
+  DEFAULT_CLOUD_NAME,
+  DEFAULT_UPLOAD_PRESET,
+} from '../utils/cloudinary';
+import { processImage } from '../utils/imageUtils';
+import { cropToBlob, rotateToBlob, loadEditableImage } from '../utils/cropImage';
 
 const photoThumb = (photo) => photo.thumbnailUrl || photo.url;
 const photoFull = (photo) => photo.fullUrl || photo.url;
@@ -43,6 +52,8 @@ const AdminPanel = ({ onLogout }) => {
   const [editingPhoto, setEditingPhoto] = useState(null);
   const [editDraft, setEditDraft] = useState({ title: '', description: '', section: '' });
   const [savingEdit, setSavingEdit] = useState(false);
+  const [cropping, setCropping] = useState(false);
+  const [imageBusy, setImageBusy] = useState('');
 
   const flash = (message, isError = false) => {
     if (isError) {
@@ -95,6 +106,10 @@ const AdminPanel = ({ onLogout }) => {
   useEffect(() => {
     const onKey = (e) => {
       if (e.key !== 'Escape') return;
+      if (cropping) {
+        setCropping(false);
+        return;
+      }
       if (editingPhoto) {
         setEditingPhoto(null);
         return;
@@ -103,7 +118,7 @@ const AdminPanel = ({ onLogout }) => {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [pickingFor, editingPhoto]);
+  }, [pickingFor, editingPhoto, cropping]);
 
   const unassignedPhotos = photos.filter((photo) => isUnassignedSection(photo.section));
   const filteredPhotos =
@@ -270,6 +285,7 @@ const AdminPanel = ({ onLogout }) => {
       description: photo.description || photo.alt || '',
       section: isUnassignedSection(photo.section) ? '' : photo.section,
     });
+    setCropping(false);
   };
 
   const handlePhotoClick = (photo) => {
@@ -302,6 +318,77 @@ const AdminPanel = ({ onLogout }) => {
       flash(err.message || 'Could not save photo details.', true);
     } finally {
       setSavingEdit(false);
+    }
+  };
+
+  const replaceFeaturedUrls = async (oldPhoto, nextUrl) => {
+    const oldUrls = [oldPhoto.url, oldPhoto.thumbnailUrl, oldPhoto.fullUrl].filter(Boolean);
+    const nextHome = selectedHomepagePhotos.map((url) =>
+      oldUrls.includes(url) ? nextUrl : url
+    );
+    const homeChanged = nextHome.some((url, index) => url !== selectedHomepagePhotos[index]);
+    if (homeChanged) {
+      setSelectedHomepagePhotos(nextHome);
+      await updateHomepagePhotos(nextHome);
+    }
+    if (oldUrls.includes(selectedProfilePhoto)) {
+      setSelectedProfilePhoto(nextUrl);
+      await updateProfilePhoto(nextUrl);
+    }
+  };
+
+  const saveEditedImage = async (blob) => {
+    if (!editingPhoto) return;
+    const file = new File([blob], `edit-${Date.now()}.jpg`, { type: blob.type || 'image/jpeg' });
+    const processed = await processImage(file);
+    const uploaded = await uploadImageToCloudinary(
+      new File([processed.full], file.name, { type: processed.full.type }),
+      { cloudName: DEFAULT_CLOUD_NAME, uploadPreset: DEFAULT_UPLOAD_PRESET }
+    );
+    const thumbURL = cloudinaryDeliveryUrl(uploaded, 'c_limit,w_800,q_auto,f_auto');
+    const fullURL = cloudinaryDeliveryUrl(uploaded, 'c_limit,w_2000,q_auto,f_auto');
+    const patch = await updatePhoto(editingPhoto.id, {
+      url: fullURL,
+      thumbnailUrl: thumbURL,
+      fullUrl: fullURL,
+      width: processed.width,
+      height: processed.height,
+      aspectRatio: processed.aspectRatio,
+    });
+    const updated = { ...editingPhoto, ...patch };
+    setPhotos((prev) => prev.map((photo) => (photo.id === editingPhoto.id ? updated : photo)));
+    setEditingPhoto(updated);
+    await replaceFeaturedUrls(editingPhoto, fullURL);
+    return updated;
+  };
+
+  const handleApplyCrop = async (img, crop) => {
+    setImageBusy('crop');
+    try {
+      const cropped = await cropToBlob(img, crop);
+      await saveEditedImage(cropped.blob);
+      setCropping(false);
+      flash('Crop saved.');
+    } catch (err) {
+      console.error('Error cropping photo:', err);
+      flash(err.message || 'Could not crop this photo.', true);
+    } finally {
+      setImageBusy('');
+    }
+  };
+
+  const handleRotate = async () => {
+    setImageBusy('rotate');
+    try {
+      const img = await loadEditableImage(photoFull(editingPhoto));
+      const rotated = await rotateToBlob(img);
+      await saveEditedImage(rotated.blob);
+      flash('Photo rotated.');
+    } catch (err) {
+      console.error('Error rotating photo:', err);
+      flash(err.message || 'Could not rotate this photo. Upload it through this panel first.', true);
+    } finally {
+      setImageBusy('');
     }
   };
 
@@ -552,55 +639,92 @@ const AdminPanel = ({ onLogout }) => {
       </div>
 
       {editingPhoto && (
-        <div className="admin-modal-backdrop" onClick={() => setEditingPhoto(null)}>
+        <div
+          className="admin-modal-backdrop"
+          onClick={() => {
+            if (imageBusy) return;
+            if (cropping) {
+              setCropping(false);
+              return;
+            }
+            setEditingPhoto(null);
+          }}
+        >
           <form
-            className="admin-modal"
+            className={`admin-modal${cropping ? ' admin-modal--crop' : ''}`}
             onClick={(e) => e.stopPropagation()}
-            onSubmit={handleSaveEdit}
+            onSubmit={(e) => {
+              if (cropping) {
+                e.preventDefault();
+                return;
+              }
+              handleSaveEdit(e);
+            }}
           >
-            <h3>Edit photo</h3>
-            <p className="admin-help">Title, description, and column. Title and description show when someone clicks the photo on the site.</p>
-            <img className="admin-modal-preview" src={photoThumb(editingPhoto)} alt="" />
-            <label className="admin-field" htmlFor="editSection">Column</label>
-            <select
-              id="editSection"
-              className="admin-select"
-              value={editDraft.section}
-              onChange={(e) => setEditDraft((prev) => ({ ...prev, section: e.target.value }))}
-            >
-              <option value="">Unassigned — sort later</option>
-              {sections.map((section) => (
-                <option key={section.id} value={section.id}>
-                  {section.label}
-                </option>
-              ))}
-            </select>
-            <label className="admin-field" htmlFor="editTitle">Title</label>
-            <input
-              id="editTitle"
-              className="admin-input"
-              type="text"
-              value={editDraft.title}
-              onChange={(e) => setEditDraft((prev) => ({ ...prev, title: e.target.value }))}
-              placeholder="Photo title"
-            />
-            <label className="admin-field" htmlFor="editDescription">Description</label>
-            <textarea
-              id="editDescription"
-              className="admin-textarea"
-              rows={4}
-              value={editDraft.description}
-              onChange={(e) => setEditDraft((prev) => ({ ...prev, description: e.target.value }))}
-              placeholder="What should people read when they open this photo?"
-            />
-            <div className="admin-modal-actions">
-              <button type="button" className="admin-chip" onClick={() => setEditingPhoto(null)}>
-                Cancel
-              </button>
-              <button type="submit" disabled={savingEdit}>
-                {savingEdit ? 'SAVING…' : 'SAVE'}
-              </button>
-            </div>
+            <h3>{cropping ? 'Crop photo' : 'Edit photo'}</h3>
+            {cropping ? (
+              <PhotoCropper
+                src={photoFull(editingPhoto)}
+                onCancel={() => setCropping(false)}
+                onApply={handleApplyCrop}
+                busy={imageBusy === 'crop'}
+              />
+            ) : (
+              <>
+                <p className="admin-help">
+                  Crop or rotate the photo, then set the title and description visitors see when they click it.
+                </p>
+                <img className="admin-modal-preview" src={photoThumb(editingPhoto)} alt="" />
+                <div className="admin-image-tools">
+                  <button type="button" className="admin-chip" onClick={() => setCropping(true)} disabled={Boolean(imageBusy)}>
+                    Crop
+                  </button>
+                  <button type="button" className="admin-chip" onClick={handleRotate} disabled={Boolean(imageBusy)}>
+                    {imageBusy === 'rotate' ? 'Rotating…' : 'Rotate 90°'}
+                  </button>
+                </div>
+                <label className="admin-field" htmlFor="editSection">Column</label>
+                <select
+                  id="editSection"
+                  className="admin-select"
+                  value={editDraft.section}
+                  onChange={(e) => setEditDraft((prev) => ({ ...prev, section: e.target.value }))}
+                >
+                  <option value="">Unassigned — sort later</option>
+                  {sections.map((section) => (
+                    <option key={section.id} value={section.id}>
+                      {section.label}
+                    </option>
+                  ))}
+                </select>
+                <label className="admin-field" htmlFor="editTitle">Title</label>
+                <input
+                  id="editTitle"
+                  className="admin-input"
+                  type="text"
+                  value={editDraft.title}
+                  onChange={(e) => setEditDraft((prev) => ({ ...prev, title: e.target.value }))}
+                  placeholder="Photo title"
+                />
+                <label className="admin-field" htmlFor="editDescription">Description</label>
+                <textarea
+                  id="editDescription"
+                  className="admin-textarea"
+                  rows={4}
+                  value={editDraft.description}
+                  onChange={(e) => setEditDraft((prev) => ({ ...prev, description: e.target.value }))}
+                  placeholder="What should people read when they open this photo?"
+                />
+                <div className="admin-modal-actions">
+                  <button type="button" className="admin-chip" onClick={() => setEditingPhoto(null)}>
+                    Cancel
+                  </button>
+                  <button type="submit" disabled={savingEdit || Boolean(imageBusy)}>
+                    {savingEdit ? 'SAVING…' : 'SAVE'}
+                  </button>
+                </div>
+              </>
+            )}
           </form>
         </div>
       )}
