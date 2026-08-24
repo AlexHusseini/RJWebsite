@@ -168,7 +168,7 @@ function App() {
                   fontWeight: 300,
                   lineHeight: 1.6
                 }}>
-                  I'm RS, a professional automotive photographer based in Georgia. 
+                  I'm RJ, a professional automotive photographer based in Georgia. 
                   I specialize in capturing the essence and beauty of automobiles, 
                   from classic vintage cars to modern sports cars and everything in between.
                 </p>
